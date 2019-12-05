@@ -31,10 +31,7 @@ class _NavPageState extends State<NavPage> {
         backgroundColor: widget.style.color,
       ),
       backgroundColor: widget.style.color[100],
-      body: Container(
-        padding: EdgeInsets.all(16),
-        child: widget.style.body,
-      ),
+      body: widget.style.body,
     );
   }
 }

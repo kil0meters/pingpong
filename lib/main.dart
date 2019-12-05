@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'navigation.dart';
 import 'remote_page.dart';
+import 'drill_editor.dart';
+import 'settings_menu.dart';
 
 void main() => runApp(PongApp());
 
@@ -30,10 +31,17 @@ class PongApp extends StatelessWidget {
   }
 }
 
+class NavBarItem {
+  const NavBarItem(this.title, this.icon, this.color);
+  final String title;
+  final IconData icon;
+  final MaterialColor color;
+}
+
 List<NavBarItem> navigationPages = <NavBarItem>[
-  NavBarItem('Drills', Icons.collections_bookmark, Colors.blue, Text("wow1")),
-  NavBarItem('Remote', Icons.settings_remote, Colors.red, RemotePage()),
-  NavBarItem('Settings', Icons.settings, Colors.grey, Text("wow3")),
+  NavBarItem('Drills', Icons.collections_bookmark, Colors.green),
+  NavBarItem('Remote', Icons.settings_remote, Colors.deepPurple),
+  NavBarItem('Settings', Icons.settings, Colors.grey),
 ];
 
 class HomePage extends StatefulWidget {
@@ -51,9 +59,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin<HomeP
         top: false,
         child: IndexedStack(
           index: _currentIndex,
-          children: navigationPages.map<Widget>((NavBarItem page) {
-            return NavPage(style: page);
-          }).toList(),
+          children: [
+            DrillPage(),
+            RemotePage(),
+            RemotePage(),
+          ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
