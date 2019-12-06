@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:morpheus/page_routes/morpheus_page_route.dart';
 
 import 'globals.dart' as globals;
 import 'sliders.dart';
@@ -132,46 +133,70 @@ class _DrillListState extends State<DrillList> {
         title: Text('Drills'),
         backgroundColor: Colors.green,
       ),
-      body: ListView.builder(
-        itemCount: drills.length,
-        itemBuilder: (context, index) {
-          return Card(
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        drills[index].title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        )
-                      ),
-                      Text(
-                        drills[index].description,
-                        style: TextStyle(
-
-                        )
-                      ),
-                    ],
-                  ),
-                ]
-              )
-            )
-          );
-        }
+      body: Container(
+        padding: EdgeInsets.all(12),
+        child: ListView.separated(
+          itemCount: drills.length,
+          separatorBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              height: 10,
+            );
+          },
+          itemBuilder: (BuildContext context, int index) {
+            final _parentKey = GlobalKey();
+            return Card(
+              key: _parentKey,
+              elevation: 8,
+              child: ListTile(
+                // key: _parentKey,
+                title: Text(drills[index].title),
+                subtitle: Text(drills[index].description),
+                onTap: () => _handleTap(context, _parentKey),
+              ),
+            );
+          }
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/editor');
         },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.greenAccent,
+        child: Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+        backgroundColor: Colors.blueAccent,
       ),
     );
+  }
+
+  void _handleTap(BuildContext context, GlobalKey parentKey) {
+    Navigator.of(context).push(MorpheusPageRoute(
+      builder: (context) => Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          iconTheme: IconThemeData(
+            color: Colors.black,
+          ),
+          title: Text(
+            'test',
+            style: TextStyle(
+              color: Colors.black,
+            )
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/editor');
+          },
+          child: Icon(
+            Icons.edit,
+            color: Colors.white,
+          ),
+          backgroundColor: Colors.blueAccent,
+        ),
+      ),
+      parentKey: parentKey,
+    ));
   }
 }

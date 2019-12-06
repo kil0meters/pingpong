@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:morpheus/morpheus.dart';
 
 import 'remote_page.dart';
 import 'drill_editor.dart';
@@ -38,40 +39,41 @@ class NavBarItem {
   final MaterialColor color;
 }
 
-List<NavBarItem> navigationPages = <NavBarItem>[
-  NavBarItem('Drills', Icons.collections_bookmark, Colors.green),
-  NavBarItem('Remote', Icons.settings_remote, Colors.deepPurple),
-  NavBarItem('Settings', Icons.settings, Colors.grey),
-];
-
 class HomePage extends StatefulWidget {
   @override 
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin<HomePage> {
-  int _currentIndex = 0;
+  int _currentIndex = 1;
+
+  final List<NavBarItem> navigationPages = <NavBarItem>[
+    NavBarItem('Drills', Icons.collections_bookmark, Colors.green),
+    NavBarItem('Remote', Icons.settings_remote, Colors.deepPurple),
+    NavBarItem('Settings', Icons.settings, Colors.grey),
+  ];
+
+
+  final List<Widget> _screens = <Widget>[
+    DrillPage(),
+    RemotePage(),
+    RemotePage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        top: false,
-        child: IndexedStack(
-          index: _currentIndex,
-          children: [
-            DrillPage(),
-            RemotePage(),
-            RemotePage(),
-          ],
-        ),
+      body: MorpheusTabView(
+        child: _screens[_currentIndex],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.shifting,
+        // type: BottomNavigationBarType.shifting,
         currentIndex: _currentIndex,
         onTap: (int index) {
           setState(() {
-            _currentIndex = index;
+            if (index != _currentIndex) {
+              setState(() => _currentIndex = index);
+            }
           });
         },
         items: navigationPages.map((NavBarItem page) {
