@@ -2,4 +2,4 @@
 
 An application for controlling PingPong machines.
 
-It will integrate with a backend which doesn't exist yet.
+Integrates with [pingpong-server](https://github.com/kil0meters/pingpong-server).
