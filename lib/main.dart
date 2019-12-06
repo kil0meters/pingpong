@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:morpheus/morpheus.dart';
 
-import 'remote_page.dart';
-import 'drill_editor.dart';
-import 'settings_menu.dart';
+import 'remote_screen.dart';
+import 'drill_screen.dart';
+import 'settings_screen.dart';
 
 void main() => runApp(PongApp());
 
@@ -32,39 +32,24 @@ class PongApp extends StatelessWidget {
   }
 }
 
-class NavBarItem {
-  const NavBarItem(this.title, this.icon, this.color);
-  final String title;
-  final IconData icon;
-  final MaterialColor color;
-}
-
 class HomePage extends StatefulWidget {
-  @override 
+  @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin<HomePage> {
+class _HomePageState extends State<HomePage>
+    with TickerProviderStateMixin<HomePage> {
+  
   int _currentIndex = 1;
 
-  final List<NavBarItem> navigationPages = <NavBarItem>[
-    NavBarItem('Drills', Icons.collections_bookmark, Colors.green),
-    NavBarItem('Remote', Icons.settings_remote, Colors.deepPurple),
-    NavBarItem('Settings', Icons.settings, Colors.grey),
-  ];
-
-
-  final List<Widget> _screens = <Widget>[
-    DrillPage(),
-    RemotePage(),
-    RemotePage(),
-  ];
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: MorpheusTabView(
-        child: _screens[_currentIndex],
+      body: MorpheusTabView( // TODO: replace with stack to preseve state between tab switches
+        child: <Widget>[ 
+          DrillScreen(),
+          RemoteScreen(),
+          RemoteScreen(),
+        ][_currentIndex],
       ),
       bottomNavigationBar: BottomNavigationBar(
         // type: BottomNavigationBarType.shifting,
@@ -76,13 +61,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin<HomeP
             }
           });
         },
-        items: navigationPages.map((NavBarItem page) {
-          return BottomNavigationBarItem(
-            icon: Icon(page.icon),
-            backgroundColor: page.color,
-            title: Text(page.title)
-          );
-        }).toList(),
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+              icon: Icon(Icons.collections_bookmark),
+              backgroundColor: Colors.green,
+              title: Text('Drills')),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings_remote),
+              backgroundColor: Colors.deepPurple,
+              title: Text('Remote')),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              backgroundColor: Colors.grey,
+              title: Text('Settings')),
+        ],
       ),
     );
   }

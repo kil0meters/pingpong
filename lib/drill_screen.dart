@@ -14,8 +14,8 @@ class Drill {
   final int backspin;
 }
 
-class DrillPage extends StatelessWidget {
-  DrillPage({Key key}) : super(key: key);
+class DrillScreen extends StatelessWidget {
+  DrillScreen({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

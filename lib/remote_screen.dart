@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'sliders.dart';
 import 'globals.dart' as globals;
 
-class RemotePage extends StatelessWidget {
-  RemotePage({Key key}) : super(key: key);
+class RemoteScreen extends StatelessWidget {
+  RemoteScreen({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
