@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'globals.dart' as globals;
+import 'sliders.dart';
 
 class Drill {
   const Drill(this.title, this.description, this.firingSpeed, this.oscillationFrequency, this.topspin, this.backspin);
@@ -12,61 +13,9 @@ class Drill {
   final int backspin;
 }
 
-class DrillEditorSlider extends StatefulWidget {
-  final String title;
-  final double max;
-  final double min;
-
-  DrillEditorSlider({Key key, this.title, this.max, this.min}) : super(key: key);
-
-  @override
-  _DrillEditorSliderState createState() => _DrillEditorSliderState(rangeStart: min, rangeEnd: max);
-}
-
-class _DrillEditorSliderState extends State<DrillEditorSlider> {
-  double rangeStart;
-  double rangeEnd;
-
-  _DrillEditorSliderState({Key key, this.rangeStart, this.rangeEnd});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            '${widget.title}: ${this.rangeStart.floor()}-${this.rangeEnd.floor()}',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          RangeSlider(
-            max: widget.max,
-            min: widget.min,
-            onChanged: (RangeValues values) {
-              setState(() {
-                rangeStart = values.start;
-                rangeEnd = values.end;
-              });
-            },
-            values: RangeValues(this.rangeStart, this.rangeEnd)
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class DrillPage extends StatefulWidget {
+class DrillPage extends StatelessWidget {
   DrillPage({Key key}) : super(key: key);
 
-  @override
-  _DrillPageState createState() => _DrillPageState();
-}
-
-class _DrillPageState extends State<DrillPage> {
   @override
   Widget build(BuildContext context) {
     return Navigator(
@@ -104,10 +53,10 @@ class DrillEditorAutomatic extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            DrillEditorSlider(title: "Firing Speed", max: globals.firingSpeedMax, min: globals.firingSpeedMin),
-            DrillEditorSlider(title: "Oscillation Speed", max: globals.oscillationSpeedMax, min: globals.oscillationSpeedMin),
-            DrillEditorSlider(title: "Topspin", max: globals.topspinMax, min: globals.topspinMin),
-            DrillEditorSlider(title: "Backspin", max: globals.backspinMax, min: globals.topspinMin),
+            PingPongRangeSlider(title: "Firing Speed", max: globals.firingSpeedMax, min: globals.firingSpeedMin),
+            PingPongRangeSlider(title: "Oscillation Speed", max: globals.oscillationSpeedMax, min: globals.oscillationSpeedMin),
+            PingPongRangeSlider(title: "Topspin", max: globals.topspinMax, min: globals.topspinMin),
+            PingPongRangeSlider(title: "Backspin", max: globals.backspinMax, min: globals.topspinMin),
             Padding(
               padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
               child: Column(
@@ -210,17 +159,6 @@ class _DrillListState extends State<DrillList> {
                       ),
                     ],
                   ),
-                  FlatButton(
-                    onPressed: () {
-                      // 
-                    },
-                    shape: CircleBorder(),
-                    color: Colors.transparent,
-                    child: Icon(
-                      Icons.edit,
-                      color: Colors.black54,
-                    )
-                  )
                 ]
               )
             )

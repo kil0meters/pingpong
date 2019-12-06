@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'pong_knob.dart';
+import 'sliders.dart';
+import 'globals.dart' as globals;
 
-class RemotePage extends StatefulWidget {
+class RemotePage extends StatelessWidget {
   RemotePage({Key key}) : super(key: key);
 
-  @override
-  _RemotePageState createState() => _RemotePageState();
-}
-
-class _RemotePageState extends State<RemotePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,23 +19,78 @@ class _RemotePageState extends State<RemotePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
-              children: <Widget>[
-                Text('Automatic Firing'),
-                Switch(
-                  value: false,
-                  activeColor: Colors.deepOrangeAccent,
-                  onChanged: (isFiring) => {},
-                ),
-              ],
+            PingPongSlider(
+              title: 'Firing Speed',
+              unit: 'balls per minute',
+              max: globals.firingSpeedMax,
+              min: globals.firingSpeedMin
             ),
-            PongKnob(description: "Firing Speed", maxValue: 10, minValue: 0),
-            PongKnob(description: "Oscillation Frequency", maxValue: 10, minValue: 0),
-            PongKnob(description: "Backspin", maxValue: 10, minValue: 0),
-            PongKnob(description: "Topspin", maxValue: 10, minValue: 0),
+            PingPongSlider(
+              title: 'Oscillation Speed',
+              unit: 'rotations per minute',
+              max: globals.oscillationSpeedMax,
+              min: globals.oscillationSpeedMin,
+            ),
+            PingPongSlider(
+              title: "Backspin",
+              max: globals.oscillationSpeedMax,
+              min: globals.oscillationSpeedMin
+            ),
+            PingPongSlider(
+              title: "Topspin",
+              max: globals.oscillationSpeedMax,
+              min: globals.oscillationSpeedMin
+            ),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ResumeFiringButton(),
+            )
           ],
         ),
       ),
+    );
+  }
+}
+
+class ResumeFiringButton extends StatefulWidget {
+  const ResumeFiringButton({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  _ResumeFiringButtonState createState() => _ResumeFiringButtonState(); 
+}
+
+class _ResumeFiringButtonState extends State<ResumeFiringButton> {
+  bool isOn = false;
+  String label = 'TURN ON';
+  MaterialColor buttonColor = Colors.blue;
+
+  @override
+  Widget build(BuildContext context) {
+    return RaisedButton(
+      child: Text(
+        label,
+        style: TextStyle(
+          color: Colors.white,
+        )
+      ),
+      color: buttonColor, 
+      onPressed: () {
+        setState(() {
+          if (!isOn) {
+            label = 'TURN OFF';
+            buttonColor = Colors.red;
+          }
+          else {
+            label = 'TURN ON';
+            buttonColor = Colors.blue;
+          }
+
+          isOn = !isOn;
+        });
+      }
     );
   }
 }
