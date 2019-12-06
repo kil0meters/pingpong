@@ -20,22 +20,40 @@ class DrillPage extends StatefulWidget {
 class _DrillPageState extends State<DrillPage> {
   @override
   Widget build(BuildContext context) {
+    return Navigator(
+      onGenerateRoute: (RouteSettings settings) {
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (BuildContext context) {
+            switch(settings.name) {
+              case '/':
+                return DrillList();
+              case '/editor':
+                return DrillEditor();
+            }
+          }
+        );
+      }
+    );
+  }
+}
+
+class DrillEditor extends StatefulWidget {
+  DrillEditor({Key key}) : super(key: key);
+
+  @override
+  _DrillEditorState createState() => _DrillEditorState();
+}
+
+class _DrillEditorState extends State<DrillEditor> {
+  @override 
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Drills'),
+        title: Text('Editor'),
         backgroundColor: Colors.green,
       ),
-      body: Container(
-        padding: EdgeInsets.all(12),
-        child: DrillList(),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // click
-        },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.greenAccent,
-      ),
+      body: Text('wow')
     );
   }
 }
@@ -57,49 +75,62 @@ class _DrillListState extends State<DrillList> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: drills.length,
-      itemBuilder: (context, index) {
-        return Card(
-          child: Padding(
-            padding: EdgeInsets.all(12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      drills[index].title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      )
-                    ),
-                    Text(
-                      drills[index].description,
-                      style: TextStyle(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Drills'),
+        backgroundColor: Colors.green,
+      ),
+      body: ListView.builder(
+        itemCount: drills.length,
+        itemBuilder: (context, index) {
+          return Card(
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        drills[index].title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        )
+                      ),
+                      Text(
+                        drills[index].description,
+                        style: TextStyle(
 
-                      )
-                    ),
-                  ],
-                ),
-                FlatButton(
-                  onPressed: () {
-                    // 
-                  },
-                  shape: CircleBorder(),
-                  color: Colors.transparent,
-                  child: Icon(
-                    Icons.edit,
-                    color: Colors.black54,
+                        )
+                      ),
+                    ],
+                  ),
+                  FlatButton(
+                    onPressed: () {
+                      // 
+                    },
+                    shape: CircleBorder(),
+                    color: Colors.transparent,
+                    child: Icon(
+                      Icons.edit,
+                      color: Colors.black54,
+                    )
                   )
-                )
-              ]
+                ]
+              )
             )
-          )
-        );
-      }
+          );
+        }
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/editor');
+        },
+        child: Icon(Icons.add),
+        backgroundColor: Colors.greenAccent,
+      ),
     );
   }
 }
