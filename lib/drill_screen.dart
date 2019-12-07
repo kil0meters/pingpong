@@ -5,7 +5,8 @@ import 'globals.dart' as globals;
 import 'sliders.dart';
 
 class Drill {
-  const Drill(this.title, this.description, this.firingSpeed, this.oscillationFrequency, this.topspin, this.backspin);
+  const Drill(this.title, this.description, this.firingSpeed,
+      this.oscillationFrequency, this.topspin, this.backspin);
   final String title;
   final String description;
   final int firingSpeed;
@@ -22,64 +23,82 @@ class DrillScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      key: navigatorKey,
-      onGenerateRoute: (RouteSettings settings) {
-        return MaterialPageRoute(
-          settings: settings,
-          builder: (BuildContext context) {
-            switch(settings.name) {
-              case '/':
-                return DrillList();
-              case '/editor':
-                return DrillEditorAutomatic();
-              default: 
-                return Text('ERROR - This should never happen');
-            }
-          }
-        );
-      }
-    );
+        key: navigatorKey,
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute(
+              settings: settings,
+              builder: (BuildContext context) {
+                switch (settings.name) {
+                  case '/':
+                    return DrillList();
+                  case '/editor':
+                    return DrillEditorAutomatic();
+                  default:
+                    return Text('ERROR - This should never happen');
+                }
+              });
+        });
   }
 }
 
 class DrillEditorAutomatic extends StatelessWidget {
   DrillEditorAutomatic({Key key}) : super(key: key);
 
-  @override 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Editor (Automatic)'),
-        backgroundColor: Colors.green,
-      ),
-      body: Container(
-        padding: EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            PingPongRangeSlider(title: "Firing Speed", max: globals.firingSpeedMax, min: globals.firingSpeedMin),
-            PingPongRangeSlider(title: "Oscillation Speed", max: globals.oscillationSpeedMax, min: globals.oscillationSpeedMin),
-            PingPongRangeSlider(title: "Topspin", max: globals.topspinMax, min: globals.topspinMin),
-            PingPongRangeSlider(title: "Backspin", max: globals.backspinMax, min: globals.topspinMin),
-            Padding(
-              padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
-              child: Column(
+        appBar: AppBar(
+          title: Text('Editor (Automatic)'),
+          backgroundColor: Colors.green,
+        ),
+        body: Container(
+            padding: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                PingPongRangeSlider(
+                    title: "Firing Speed",
+                    max: globals.firingSpeedMax,
+                    min: globals.firingSpeedMin,
+                    onChanged: (RangeValues values) {
 
-                children: <Widget>[
-                  Text(
-                    'Selection Mode',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    )
+                    },
                   ),
-                  DrillEditorDropdown()
-                ]
-              )
-            )
-          ],
-        )
-      )
-    );
+                PingPongRangeSlider(
+                    title: "Oscillation Speed",
+                    max: globals.oscillationSpeedMax,
+                    min: globals.oscillationSpeedMin,
+                    onChanged: (RangeValues values) {
+
+                    }
+                  ),
+                PingPongRangeSlider(
+                    title: "Topspin",
+                    max: globals.topspinMax,
+                    min: globals.topspinMin,
+                    onChanged: (RangeValues values) {
+                      
+                    }
+                  ),
+                PingPongRangeSlider(
+                    title: "Backspin",
+                    max: globals.backspinMax,
+                    min: globals.topspinMin,
+                    onChanged: (RangeValues values) {
+
+                    }
+                  ),
+                Padding(
+                    padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
+                    child: Column(children: <Widget>[
+                      Text('Selection Mode',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          )),
+                      DrillEditorDropdown()
+                    ]))
+              ],
+            )));
   }
 }
 
@@ -98,19 +117,18 @@ class _DrillEditorDropdownState extends State<DrillEditorDropdown> {
   @override
   Widget build(BuildContext context) {
     return DropdownButton<String>(
-      value: selectedValue,
-      items: <String>['Random', 'Random Noise', 'Linear'].map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-      onChanged: (String value) {
-        setState(() {
-          selectedValue = value;
+        value: selectedValue,
+        items: <String>['Random', 'Random Noise', 'Linear'].map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        onChanged: (String value) {
+          setState(() {
+            selectedValue = value;
+          });
         });
-      }
-    );
   }
 }
 
@@ -139,26 +157,25 @@ class _DrillListState extends State<DrillList> {
       body: Container(
         padding: EdgeInsets.all(12),
         child: ListView.separated(
-          itemCount: drills.length,
-          separatorBuilder: (BuildContext context, int index) {
-            return SizedBox(
-              height: 10,
-            );
-          },
-          itemBuilder: (BuildContext context, int index) {
-            final _parentKey = GlobalKey();
-            return Card(
-              key: _parentKey,
-              elevation: 8,
-              child: ListTile(
-                // key: _parentKey,
-                title: Text(drills[index].title),
-                subtitle: Text(drills[index].description),
-                onTap: () => _handleTap(context, _parentKey),
-              ),
-            );
-          }
-        ),
+            itemCount: drills.length,
+            separatorBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                height: 10,
+              );
+            },
+            itemBuilder: (BuildContext context, int index) {
+              final _parentKey = GlobalKey();
+              return Card(
+                key: _parentKey,
+                elevation: 1,
+                child: ListTile(
+                  // key: _parentKey,
+                  title: Text(drills[index].title),
+                  subtitle: Text(drills[index].description),
+                  onTap: () => _handleTap(context, _parentKey),
+                ),
+              );
+            }),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -181,12 +198,10 @@ class _DrillListState extends State<DrillList> {
           iconTheme: IconThemeData(
             color: Colors.black,
           ),
-          title: Text(
-            'test',
-            style: TextStyle(
-              color: Colors.black,
-            )
-          ),
+          title: Text('test',
+              style: TextStyle(
+                color: Colors.black,
+              )),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {

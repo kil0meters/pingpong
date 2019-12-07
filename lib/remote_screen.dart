@@ -47,27 +47,49 @@ class RemoteDefault extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          PingPongSlider(
-            title: 'Firing Speed',
-            unit: 'balls per minute',
-            max: globals.firingSpeedMax,
-            min: globals.firingSpeedMin
-          ),
-          PingPongSlider(
-            title: 'Oscillation Speed',
-            unit: 'rotations per minute',
-            max: globals.oscillationSpeedMax,
-            min: globals.oscillationSpeedMin,
-          ),
-          PingPongSlider(
-            title: "Backspin",
-            max: globals.oscillationSpeedMax,
-            min: globals.oscillationSpeedMin
-          ),
-          PingPongSlider(
-            title: "Topspin",
-            max: globals.oscillationSpeedMax,
-            min: globals.oscillationSpeedMin
+          Card(
+            margin: EdgeInsets.fromLTRB(0, 0, 0, 12),
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Column(
+                children: <Widget>[
+                  PingPongSlider(
+                    title: 'Firing Speed',
+                    unit: 'balls per minute',
+                    max: globals.firingSpeedMax,
+                    min: globals.firingSpeedMin,
+                    onChanged: (value) {
+
+                    }
+                  ),
+                  PingPongSlider(
+                    title: 'Oscillation Speed',
+                    unit: 'rotations per minute',
+                    max: globals.oscillationSpeedMax,
+                    min: globals.oscillationSpeedMin,
+                    onChanged: (value) {
+
+                    }
+                  ),
+                  PingPongSlider(
+                    title: "Backspin",
+                    max: globals.oscillationSpeedMax,
+                    min: globals.oscillationSpeedMin,
+                    onChanged: (value) {
+
+                    }
+                  ),
+                  PingPongSlider(
+                    title: "Topspin",
+                    max: globals.oscillationSpeedMax,
+                    min: globals.oscillationSpeedMin,
+                    onChanged: (value) {
+
+                    }
+                  ),
+                ]
+              )
+            )
           ),
           SizedBox(
             width: double.infinity,
