@@ -47,58 +47,70 @@ class DrillEditorAutomatic extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Editor (Automatic)'),
-          backgroundColor: Colors.green,
-        ),
-        body: Container(
-            padding: EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                PingPongRangeSlider(
+      appBar: AppBar(
+        title: Text('Editor (Automatic)'),
+        backgroundColor: Colors.green,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.fromLTRB(12, 12, 12, 0),
+            child: Text(
+              'Value Ranges',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Card(
+            margin: EdgeInsets.all(12),
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Column(
+                children: <Widget>[
+                  PingPongRangeSlider(
                     title: "Firing Speed",
                     max: globals.firingSpeedMax,
                     min: globals.firingSpeedMin,
-                    onChanged: (RangeValues values) {
-
-                    },
+                    onChanged: (RangeValues values) {},
                   ),
-                PingPongRangeSlider(
-                    title: "Oscillation Speed",
-                    max: globals.oscillationSpeedMax,
-                    min: globals.oscillationSpeedMin,
-                    onChanged: (RangeValues values) {
-
-                    }
-                  ),
-                PingPongRangeSlider(
-                    title: "Topspin",
-                    max: globals.topspinMax,
-                    min: globals.topspinMin,
-                    onChanged: (RangeValues values) {
-                      
-                    }
-                  ),
-                PingPongRangeSlider(
-                    title: "Backspin",
-                    max: globals.backspinMax,
-                    min: globals.topspinMin,
-                    onChanged: (RangeValues values) {
-
-                    }
-                  ),
-                Padding(
-                    padding: EdgeInsets.fromLTRB(0, 8, 0, 8),
-                    child: Column(children: <Widget>[
-                      Text('Selection Mode',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          )),
-                      DrillEditorDropdown()
-                    ]))
-              ],
-            )));
+                  PingPongRangeSlider(
+                      title: "Oscillation Speed",
+                      max: globals.oscillationSpeedMax,
+                      min: globals.oscillationSpeedMin,
+                      onChanged: (RangeValues values) {}),
+                  PingPongRangeSlider(
+                      title: "Topspin",
+                      max: globals.topspinMax,
+                      min: globals.topspinMin,
+                      onChanged: (RangeValues values) {}),
+                  PingPongRangeSlider(
+                      title: "Backspin",
+                      max: globals.backspinMax,
+                      min: globals.topspinMin,
+                      onChanged: (RangeValues values) {}),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            margin: EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('Selection Mode',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      )),
+                  DrillEditorDropdown()
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -155,19 +167,14 @@ class _DrillListState extends State<DrillList> {
         backgroundColor: Colors.green,
       ),
       body: Container(
-        padding: EdgeInsets.all(12),
-        child: ListView.separated(
+        child: ListView.builder(
             itemCount: drills.length,
-            separatorBuilder: (BuildContext context, int index) {
-              return SizedBox(
-                height: 10,
-              );
-            },
             itemBuilder: (BuildContext context, int index) {
               final _parentKey = GlobalKey();
               return Card(
                 key: _parentKey,
                 elevation: 1,
+                margin: EdgeInsets.fromLTRB(12, 12, 12, 0),
                 child: ListTile(
                   // key: _parentKey,
                   title: Text(drills[index].title),
