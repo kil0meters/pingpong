@@ -15,11 +15,14 @@ class Drill {
 }
 
 class DrillScreen extends StatelessWidget {
-  DrillScreen({Key key}) : super(key: key);
+  final GlobalKey navigatorKey;
+
+  DrillScreen({Key key, this.navigatorKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Navigator(
+      key: navigatorKey,
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute(
           settings: settings,

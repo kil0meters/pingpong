@@ -4,7 +4,9 @@ import 'sliders.dart';
 import 'globals.dart' as globals;
 
 class RemoteScreen extends StatelessWidget {
-  RemoteScreen({Key key}) : super(key: key);
+  final GlobalKey navigatorKey;
+
+  RemoteScreen({Key key, this.navigatorKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,41 +15,66 @@ class RemoteScreen extends StatelessWidget {
         title: const Text('Remote'),
         backgroundColor: Colors.deepPurple,
       ),
-      body: Container(
-        padding: EdgeInsets.all(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            PingPongSlider(
-              title: 'Firing Speed',
-              unit: 'balls per minute',
-              max: globals.firingSpeedMax,
-              min: globals.firingSpeedMin
-            ),
-            PingPongSlider(
-              title: 'Oscillation Speed',
-              unit: 'rotations per minute',
-              max: globals.oscillationSpeedMax,
-              min: globals.oscillationSpeedMin,
-            ),
-            PingPongSlider(
-              title: "Backspin",
-              max: globals.oscillationSpeedMax,
-              min: globals.oscillationSpeedMin
-            ),
-            PingPongSlider(
-              title: "Topspin",
-              max: globals.oscillationSpeedMax,
-              min: globals.oscillationSpeedMin
-            ),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ResumeFiringButton(),
-            )
-          ],
-        ),
+      body: Navigator(
+        key: navigatorKey,
+        onGenerateRoute: (RouteSettings settings ) {
+          return MaterialPageRoute(
+            builder: (BuildContext context) {
+              switch(settings.name) {
+                case '/':
+                  return RemoteDefault();
+                default:
+                  return Text('ERROR - this should never happen');
+              }
+            }
+          );
+        }
+      )
+    );
+  }
+}
+
+class RemoteDefault extends StatelessWidget {
+  const RemoteDefault({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          PingPongSlider(
+            title: 'Firing Speed',
+            unit: 'balls per minute',
+            max: globals.firingSpeedMax,
+            min: globals.firingSpeedMin
+          ),
+          PingPongSlider(
+            title: 'Oscillation Speed',
+            unit: 'rotations per minute',
+            max: globals.oscillationSpeedMax,
+            min: globals.oscillationSpeedMin,
+          ),
+          PingPongSlider(
+            title: "Backspin",
+            max: globals.oscillationSpeedMax,
+            min: globals.oscillationSpeedMin
+          ),
+          PingPongSlider(
+            title: "Topspin",
+            max: globals.oscillationSpeedMax,
+            min: globals.oscillationSpeedMin
+          ),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ResumeFiringButton(),
+          )
+        ],
       ),
     );
   }

@@ -39,27 +39,49 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with TickerProviderStateMixin<HomePage> {
-  
   int _currentIndex = 1;
+
+  // array storing navigator keys so the back buttin will work properly
+  //  class navigatorKeys {
+  //   drillScreen: GlobalKey<NavigatorState>();
+  //   remoteScreen: GlobalKey<NavigatorState>();
+  //   settingsScreen: GlobalKey<NavigatorState>();
+  // };
+
+  final navigatorKeys = <GlobalKey<NavigatorState>>[
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+  ];
 
   Widget build(BuildContext context) {
     return Scaffold(
-      body: MorpheusTabView( // TODO: replace with stack to preseve state between tab switches
-        child: <Widget>[ 
-          DrillScreen(),
-          RemoteScreen(),
-          RemoteScreen(),
-        ][_currentIndex],
+      body: WillPopScope(
+        // send signal to the proper state
+        onWillPop: () async =>
+            !await navigatorKeys[_currentIndex].currentState.maybePop(),
+        child: MorpheusTabView(
+          curve: Curves.easeInOutSine,
+          duration: Duration(milliseconds: 200),
+          child: IndexedStack(
+            index: _currentIndex,
+            children: <Widget>[
+              DrillScreen(navigatorKey: navigatorKeys[0]),
+              RemoteScreen(navigatorKey: navigatorKeys[1]),
+              RemoteScreen(navigatorKey: navigatorKeys[2]),
+            ],
+          ),
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         // type: BottomNavigationBarType.shifting,
         currentIndex: _currentIndex,
         onTap: (int index) {
-          setState(() {
-            if (index != _currentIndex) {
+          if (index != _currentIndex) {
+            setState(() {
               setState(() => _currentIndex = index);
-            }
-          });
+            });
+          }
         },
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
