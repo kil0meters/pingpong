@@ -68,13 +68,13 @@ class _HomePageState extends State<HomePage>
             children: <Widget>[
               DrillScreen(navigatorKey: navigatorKeys[0]),
               RemoteScreen(navigatorKey: navigatorKeys[1]),
-              RemoteScreen(navigatorKey: navigatorKeys[2]),
+              SettingsScreen(navigatorKey: navigatorKeys[2]),
             ],
           ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        // type: BottomNavigationBarType.shifting,
+        type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: (int index) {
           if (index != _currentIndex) {
@@ -94,7 +94,7 @@ class _HomePageState extends State<HomePage>
               title: Text('Remote')),
           BottomNavigationBarItem(
               icon: Icon(Icons.settings),
-              backgroundColor: Colors.grey,
+              backgroundColor: Colors.blueGrey,
               title: Text('Settings')),
         ],
       ),
