@@ -193,7 +193,7 @@ class _DrillListState extends State<DrillList> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/editor');
-        },
+      },
         child: Icon(
           Icons.add,
           color: Colors.white,

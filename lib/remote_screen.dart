@@ -41,7 +41,8 @@ class RemoteDefault extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return SingleChildScrollView(
+      child: Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -98,6 +99,7 @@ class RemoteDefault extends StatelessWidget {
           )
         ),
       ],
+    ),
     );
   }
 }
