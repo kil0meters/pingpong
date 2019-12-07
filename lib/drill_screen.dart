@@ -3,7 +3,7 @@ import 'package:morpheus/page_routes/morpheus_page_route.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 import 'globals.dart' as globals;
-import 'sliders.dart';
+import 'drill_editor.dart';
 
 class Drill {
   const Drill(this.title, this.description, this.firingSpeedMax, this.firingSpeedMin,
@@ -43,109 +43,6 @@ class DrillScreen extends StatelessWidget {
                     return Text('ERROR - This should never happen');
                 }
               });
-        });
-  }
-}
-
-class DrillEditorAutomatic extends StatelessWidget {
-  DrillEditorAutomatic({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Editor (Automatic)'),
-        backgroundColor: Colors.green,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            margin: EdgeInsets.fromLTRB(12, 12, 12, 0),
-            child: Text(
-              'Value Ranges',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(12),
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Column(
-                children: <Widget>[
-                  PingPongRangeSlider(
-                    title: "Firing Speed",
-                    max: globals.firingSpeedMax,
-                    min: globals.firingSpeedMin,
-                    onChanged: (RangeValues values) {},
-                  ),
-                  PingPongRangeSlider(
-                      title: "Oscillation Speed",
-                      max: globals.oscillationSpeedMax,
-                      min: globals.oscillationSpeedMin,
-                      onChanged: (RangeValues values) {}),
-                  PingPongRangeSlider(
-                      title: "Topspin",
-                      max: globals.topspinMax,
-                      min: globals.topspinMin,
-                      onChanged: (RangeValues values) {}),
-                  PingPongRangeSlider(
-                      title: "Backspin",
-                      max: globals.backspinMax,
-                      min: globals.topspinMin,
-                      onChanged: (RangeValues values) {}),
-                ],
-              ),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.fromLTRB(12, 0, 12, 12),
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text('Selection Mode',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      )),
-                  DrillEditorDropdown()
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class DrillEditorDropdown extends StatefulWidget {
-  const DrillEditorDropdown({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  _DrillEditorDropdownState createState() => _DrillEditorDropdownState();
-}
-
-class _DrillEditorDropdownState extends State<DrillEditorDropdown> {
-  String selectedValue = 'Random';
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButton<String>(
-        value: selectedValue,
-        items: <String>['Random', 'Random Noise', 'Linear'].map((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-        onChanged: (String value) {
-          setState(() {
-            selectedValue = value;
-          });
         });
   }
 }
@@ -192,14 +89,50 @@ class _DrillListState extends State<DrillList> {
       )),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/editor');
-      },
+          _showDrillTypeDialog(context);
+        },
         child: Icon(
           Icons.add,
           color: Colors.white,
         ),
         backgroundColor: globals.accentColor,
       ),
+    );
+  }
+
+  void _showDrillTypeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Drill Type'),
+          content: Text('Choose the type of drill you want'),
+          actions: <Widget> [
+            FlatButton(
+              child: Text('Manual'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => DrillEditorManual(),
+                  ),
+                );
+              },
+            ),
+            FlatButton(
+              child: Text('Automatic'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => DrillEditorAutomatic(),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      }
     );
   }
 

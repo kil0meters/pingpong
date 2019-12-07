@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'sliders.dart';
-import 'globals.dart' as globals;
-
 class SettingsScreen extends StatelessWidget {
   final GlobalKey navigatorKey;
 
