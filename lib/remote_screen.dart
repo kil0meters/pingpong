@@ -114,7 +114,7 @@ class ResumeFiringButton extends StatefulWidget {
 class _ResumeFiringButtonState extends State<ResumeFiringButton> {
   bool isOn = false;
   String label = 'TURN ON';
-  MaterialColor buttonColor = Colors.blue;
+  Color buttonColor = globals.accentColor;
 
   @override
   Widget build(BuildContext context) {
@@ -130,11 +130,11 @@ class _ResumeFiringButtonState extends State<ResumeFiringButton> {
         setState(() {
           if (!isOn) {
             label = 'TURN OFF';
-            buttonColor = Colors.red;
+            buttonColor = globals.errorAccentColor;
           }
           else {
             label = 'TURN ON';
-            buttonColor = Colors.blue;
+            buttonColor = globals.accentColor;
           }
 
           isOn = !isOn;

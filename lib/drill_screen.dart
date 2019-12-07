@@ -198,7 +198,7 @@ class _DrillListState extends State<DrillList> {
           Icons.add,
           color: Colors.white,
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: globals.accentColor,
       ),
     );
   }
@@ -295,6 +295,24 @@ class DrillViewer extends StatelessWidget {
               ),
             ),
           ),
+          SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: RaisedButton(
+                color: globals.accentColor,
+                child: Text(
+                  'START DRILL',
+                  style: TextStyle(
+                    color: Colors.white,
+                  )
+                ),
+                onPressed: () {
+
+                },
+              )
+            )
+          )
         ],
       )
     );
@@ -323,7 +341,6 @@ class ListViewCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget> [
-          
           Divider(),
           Padding(
             padding: EdgeInsets.fromLTRB(12, 4, 12, 12),

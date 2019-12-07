@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:morpheus/morpheus.dart';
 
+import 'globals.dart' as globals;
 import 'remote_screen.dart';
 import 'drill_screen.dart';
 import 'settings_screen.dart';
@@ -25,7 +26,7 @@ class PongApp extends StatelessWidget {
         // is not restarted.
         brightness: Brightness.light,
         primaryColor: Colors.blue,
-        accentColor: Colors.yellowAccent,
+        accentColor: globals.accentColor,
       ),
       home: HomePage(),
     );
