@@ -12,67 +12,96 @@ class DrillEditorAutomatic extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Editor (Automatic)'),
+        title: Text('Drill Editor (Automatic)'),
         backgroundColor: Colors.green,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            margin: EdgeInsets.fromLTRB(12, 12, 12, 0),
-            child: Text(
-              'Value Ranges',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Card(
-            margin: EdgeInsets.all(12),
-            child: Padding(
-              padding: EdgeInsets.all(12),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
               child: Column(
                 children: <Widget>[
-                  PingPongRangeSlider(
-                    title: "Firing Speed",
-                    max: globals.firingSpeedMax,
-                    min: globals.firingSpeedMin,
-                    onChanged: (RangeValues values) {},
+                  TextField(
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Title',
+                    ),
                   ),
-                  PingPongRangeSlider(
-                      title: "Oscillation Speed",
-                      max: globals.oscillationSpeedMax,
-                      min: globals.oscillationSpeedMin,
-                      onChanged: (RangeValues values) {}),
-                  PingPongRangeSlider(
-                      title: "Topspin",
-                      max: globals.topspinMax,
-                      min: globals.topspinMin,
-                      onChanged: (RangeValues values) {}),
-                  PingPongRangeSlider(
-                      title: "Backspin",
-                      max: globals.backspinMax,
-                      min: globals.topspinMin,
-                      onChanged: (RangeValues values) {}),
+                  SizedBox(height: 12), //
+                  TextField(
+                    keyboardType: TextInputType.multiline,
+                    maxLines: 8,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Description',
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-          Card(
-            margin: EdgeInsets.fromLTRB(12, 0, 12, 12),
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text('Selection Mode',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      )),
-                  DrillEditorDropdown()
-                ],
+            Container(
+              margin: EdgeInsets.fromLTRB(12, 12, 12, 0),
+              child: Text(
+                'Value Ranges',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-          ),
-        ],
+            Card(
+              margin: EdgeInsets.all(12),
+              child: Padding(
+                padding: EdgeInsets.all(12),
+                child: Column(
+                  children: <Widget>[
+                    PingPongRangeSlider(
+                      title: "Firing Speed",
+                      max: globals.firingSpeedMax,
+                      min: globals.firingSpeedMin,
+                      onChanged: (RangeValues values) {},
+                    ),
+                    PingPongRangeSlider(
+                        title: "Oscillation Speed",
+                        max: globals.oscillationSpeedMax,
+                        min: globals.oscillationSpeedMin,
+                        onChanged: (RangeValues values) {}),
+                    PingPongRangeSlider(
+                        title: "Topspin",
+                        max: globals.topspinMax,
+                        min: globals.topspinMin,
+                        onChanged: (RangeValues values) {}),
+                    PingPongRangeSlider(
+                        title: "Backspin",
+                        max: globals.backspinMax,
+                        min: globals.topspinMin,
+                        onChanged: (RangeValues values) {}),
+                  ],
+                ),
+              ),
+            ),
+            Card(
+              margin: EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: Padding(
+                padding: EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('Selection Mode',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        )),
+                    DrillEditorDropdown()
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.save),
+        backgroundColor: globals.accentColor,
+        onPressed: () {},
       ),
     );
   }
