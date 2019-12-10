@@ -6,8 +6,17 @@ import 'globals.dart' as globals;
 import 'drill_editor.dart';
 
 class Drill {
-  const Drill(this.title, this.description, this.firingSpeedMax, this.firingSpeedMin,
-      this.oscillationSpeedMax, this.oscillationSpeedMin, this.topspinMax, this.topspinMin, this.backspinMax, this.backspinMin);
+  const Drill(
+      this.title,
+      this.description,
+      this.firingSpeedMax,
+      this.firingSpeedMin,
+      this.oscillationSpeedMax,
+      this.oscillationSpeedMin,
+      this.topspinMax,
+      this.topspinMin,
+      this.backspinMax,
+      this.backspinMin);
   final String title;
   final String description;
 
@@ -56,10 +65,25 @@ class DrillList extends StatefulWidget {
 
 class _DrillListState extends State<DrillList> {
   List<Drill> drills = <Drill>[
-    Drill("Die", "Fast firing, no oscillation", 70, 60, 0, 0, 0, 0, 0, 0),
-    Drill("Lie", "Slow firing, lots of oscillation", 5, 10, 80, 100, 0, 20, 0, 20),
-    Drill("Kind", "Lots of back spin, medium firing", 20, 60, 30, 50, 0, 0, 90, 100),
-    Drill("Mind", "Lots of top spin, medium firing", 20, 60, 30, 50, 90, 100, 0, 0),
+    Drill("Die", "Fast firing, no oscillation", 60, 70, 0, 0, 0, 0, 0, 0),
+    Drill("Lie", "Slow firing, lots of oscillation", 5, 10, 80, 100, 0, 20, 0,
+        20),
+    Drill("Kind", "Lots of back spin, medium firing", 20, 60, 30, 50, 0, 0, 90,
+        100),
+    Drill("Mind", "Lots of top spin, medium firing", 20, 60, 30, 50, 90, 100, 0,
+        0),
+    Drill(
+        "Randomonium",
+        "What is this, some kind of lottery?\n\n"
+        "This is probably useless for actual training but it seems fun I guess.",
+        5,
+        70,
+        0,
+        100,
+        0,
+        100,
+        0,
+        100),
   ];
 
   @override
@@ -81,7 +105,11 @@ class _DrillListState extends State<DrillList> {
             child: ListTile(
               // key: _parentKey,
               title: Text(drill.title),
-              subtitle: Text(drill.description),
+              subtitle: Text(
+                drill.description,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               onTap: () => _handleTap(context, _parentKey, drill),
             ),
           );
@@ -102,38 +130,37 @@ class _DrillListState extends State<DrillList> {
 
   void _showDrillTypeDialog(BuildContext context) {
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Drill Type'),
-          content: Text('Choose the type of drill you want'),
-          actions: <Widget> [
-            FlatButton(
-              child: Text('Manual'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => DrillEditorManual(),
-                  ),
-                );
-              },
-            ),
-            FlatButton(
-              child: Text('Automatic'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => DrillEditorAutomatic(),
-                  ),
-                );
-              },
-            ),
-          ],
-        );
-      }
-    );
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Drill Type'),
+            content: Text('Choose the type of drill you want'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Manual'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => DrillEditorManual(),
+                    ),
+                  );
+                },
+              ),
+              FlatButton(
+                child: Text('Automatic'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => DrillEditorAutomatic(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
+        });
   }
 
   void _handleTap(BuildContext context, GlobalKey parentKey, Drill drill) {
@@ -160,10 +187,12 @@ class DrillViewer extends StatelessWidget {
         iconTheme: IconThemeData(
           color: Colors.black,
         ),
-        title: Text(drill.title,
-            style: TextStyle(
-              color: Colors.black,
-            )),
+        title: Text(
+          drill.title,
+          style: TextStyle(
+            color: Colors.black,
+          ),
+        ),
         actions: <Widget>[
           PopupMenuButton(
             icon: Icon(Icons.more_vert),
@@ -177,7 +206,7 @@ class DrillViewer extends StatelessWidget {
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget> [
+        children: <Widget>[
           CarouselSlider(
             height: 256.0,
             items: <Widget>[
@@ -185,25 +214,33 @@ class DrillViewer extends StatelessWidget {
                 title: 'Firing Speed',
                 subtitle: 'How fast the machine fires',
                 valueMax: drill.firingSpeedMax,
-                valueMin: drill.firingSpeedMin
+                valueMin: drill.firingSpeedMin,
+                rangeMax: globals.firingSpeedMax,
+                rangeMin: globals.firingSpeedMin,
               ),
               ListViewCard(
                 title: 'Oscillation Speed',
                 subtitle: 'How fast the machine moves horizontally',
                 valueMax: drill.oscillationSpeedMax,
                 valueMin: drill.oscillationSpeedMin,
+                rangeMax: globals.oscillationSpeedMax,
+                rangeMin: globals.oscillationSpeedMin,
               ),
               ListViewCard(
                 title: 'Topspin',
                 subtitle: 'How much topspin each ball will have',
                 valueMax: drill.topspinMax,
                 valueMin: drill.topspinMin,
+                rangeMax: globals.oscillationSpeedMax,
+                rangeMin: globals.oscillationSpeedMin,
               ),
               ListViewCard(
                 title: 'Backspin',
                 subtitle: 'How much backspin each abll will have',
                 valueMax: drill.backspinMax,
                 valueMin: drill.backspinMin,
+                rangeMax: globals.oscillationSpeedMax,
+                rangeMin: globals.oscillationSpeedMin,
               ),
             ],
           ),
@@ -213,7 +250,7 @@ class DrillViewer extends StatelessWidget {
               'Description',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-              )
+              ),
             ),
           ),
           SizedBox(
@@ -238,16 +275,14 @@ class DrillViewer extends StatelessWidget {
                   'START DRILL',
                   style: TextStyle(
                     color: Colors.white,
-                  )
+                  ),
                 ),
-                onPressed: () {
-
-                },
-              )
-            )
+                onPressed: () {},
+              ),
+            ),
           )
         ],
-      )
+      ),
     );
   }
 }
@@ -257,6 +292,8 @@ class ListViewCard extends StatelessWidget {
   final String subtitle;
   final int valueMax;
   final int valueMin;
+  final double rangeMax;
+  final double rangeMin;
 
   const ListViewCard({
     Key key,
@@ -264,7 +301,21 @@ class ListViewCard extends StatelessWidget {
     this.subtitle,
     this.valueMax,
     this.valueMin,
+    this.rangeMax,
+    this.rangeMin,
   }) : super(key: key);
+
+  // color form: 0xRRGGBBAA
+
+  Color _getColorFromValue(int value) {
+    double intensityWeight = (rangeMax - value) / rangeMax;
+
+    int red = ((1 - intensityWeight) * 255).floor();
+    int green = globals.accentColor.green;
+    int blue = ((intensityWeight) * 255).floor();
+
+    return Color.fromARGB(255, red, green, blue);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -273,25 +324,44 @@ class ListViewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget> [
-          Divider(),
+        children: <Widget>[
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(4),
+                topRight: Radius.circular(4),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  // color: Colors.black38,
+                  // colors take the form 0xFFFFFFFF
+                  gradient: LinearGradient(colors: [
+                    _getColorFromValue(valueMax),
+                    _getColorFromValue(valueMin)
+                  ]),
+                ),
+              ),
+            ),
+          ),
+          Container(
+              color: Colors.black12,
+              height: 1), // Divider() without padding essentially
           Padding(
-            padding: EdgeInsets.fromLTRB(12, 4, 12, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  this.title,
-                  style: TextStyle(fontSize: 15),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  this.subtitle,
-                  style: TextStyle(fontSize: 15, color: Colors.black45),
-                ),
-              ],
-            )
-          )
+              padding: EdgeInsets.fromLTRB(12, 12, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    this.title,
+                    style: TextStyle(fontSize: 15),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    this.subtitle,
+                    style: TextStyle(fontSize: 15, color: Colors.black45),
+                  ),
+                ],
+              ))
         ],
       ),
     );
