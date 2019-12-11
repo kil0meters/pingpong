@@ -72,28 +72,34 @@ class PingPongContainerState extends State<PingPongContainer>
     with TickerProviderStateMixin<PingPongContainer> {
   int _currentIndex = 1;
 
+  GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Navigator(
-        onGenerateRoute: (RouteSettings settings) {
-          return MaterialPageRoute(
-            settings: settings,
-            builder: (BuildContext context) {
-              return MorpheusTabView(
-                curve: Curves.easeInOutSine,
-                duration: Duration(milliseconds: 200),
-                child: IndexedStack(
-                  index: _currentIndex,
-                  children: <Widget>[
-                    DrillScreen(),
-                    RemoteScreen(),
-                    SettingsScreen(),
-                  ],
-                ),
-              );
-            },
-          );
-        },
+      body: WillPopScope(
+        onWillPop: () async => !await navigatorKey.currentState.maybePop(),
+        child: Navigator(
+          key: navigatorKey,
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (BuildContext context) {
+                return MorpheusTabView(
+                  curve: Curves.easeInOutSine,
+                  duration: Duration(milliseconds: 200),
+                  child: IndexedStack(
+                    index: _currentIndex,
+                    children: <Widget>[
+                      DrillScreen(),
+                      RemoteScreen(),
+                      SettingsScreen(),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

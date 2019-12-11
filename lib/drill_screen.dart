@@ -82,7 +82,14 @@ class DrillScreen extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              onTap: () => _handleTap(context, _parentKey, drill),
+              onTap: () {
+                Navigator.of(context).push(
+                  MorpheusPageRoute(
+                    builder: (context) => new DrillViewer(drill: drill),
+                    parentKey: _parentKey,
+                  ),
+                );
+              },
             ),
           );
         }).toList(),
@@ -102,44 +109,38 @@ class DrillScreen extends StatelessWidget {
 
   void _showDrillTypeDialog(BuildContext context) {
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Drill Type'),
-            content: Text('Choose the type of drill you want'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Manual'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => DrillEditorManual(),
-                    ),
-                  );
-                },
-              ),
-              FlatButton(
-                child: Text('Automatic'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => DrillEditorAutomatic(),
-                    ),
-                  );
-                },
-              ),
-            ],
-          );
-        });
-  }
-
-  void _handleTap(BuildContext context, GlobalKey parentKey, Drill drill) {
-    Navigator.of(context).push(MorpheusPageRoute(
-      builder: (context) => new DrillViewer(drill: drill),
-      parentKey: parentKey,
-    ));
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Drill Type'),
+          content: Text('Choose the type of drill you want'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Manual'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => DrillEditorManual(),
+                  ),
+                );
+              },
+            ),
+            FlatButton(
+              child: Text('Automatic'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => DrillEditorAutomatic(),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
