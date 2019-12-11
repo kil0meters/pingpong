@@ -60,40 +60,38 @@ class DrillScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final drills = PingPongRoot.of(context).drills;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Drills'),
         backgroundColor: Colors.green,
       ),
       body: Container(
-          child: ListView(
-        padding: EdgeInsets.all(12),
-        children: PingPongRoot.of(context).drills.map<Widget>((drill) {
-          final GlobalKey _parentKey = GlobalKey();
-          return Card(
-            key: _parentKey,
-            margin: EdgeInsets.fromLTRB(0, 0, 0, 12),
-            elevation: 1,
-            child: ListTile(
-              // key: _parentKey,
-              title: Text(drill.title),
-              subtitle: Text(
-                drill.description,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+        child: ListView.builder(
+          padding: EdgeInsets.fromLTRB(0, 0, 0, 96),
+          itemCount: drills.length,
+          itemBuilder: (BuildContext context, int index) {
+            final GlobalKey _parentKey = GlobalKey();
+            return ListViewCard(
+              key: _parentKey,
+              margin: EdgeInsets.fromLTRB(12, 12, 12, 0),
+              title: drills[index].title,
+              subtitle: drills[index].description,
+              image: AutomaticFiringDrillVisualization(drill: drills[index]),
               onTap: () {
                 Navigator.of(context).push(
                   MorpheusPageRoute(
-                    builder: (context) => new DrillViewer(drill: drill),
+                    builder: (context) => new DrillViewer(drill: drills[index]),
                     parentKey: _parentKey,
+                    transitionDuration: Duration(milliseconds: 300),
                   ),
                 );
               },
-            ),
-          );
-        }).toList(),
-      )),
+            );
+          },
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _showDrillTypeDialog(context);
@@ -186,34 +184,46 @@ class DrillViewer extends StatelessWidget {
               ListViewCard(
                 title: 'Firing Speed',
                 subtitle: 'How fast the machine fires',
-                valueMax: drill.firingSpeedMax,
-                valueMin: drill.firingSpeedMin,
-                rangeMax: globals.firingSpeedMax,
-                rangeMin: globals.firingSpeedMin,
+                margin: EdgeInsets.fromLTRB(6, 12, 6, 12),
+                image: RangeVisualization(
+                  valueMax: drill.firingSpeedMax,
+                  valueMin: drill.firingSpeedMin,
+                  rangeMax: globals.firingSpeedMax,
+                  rangeMin: globals.firingSpeedMin,
+                ),
               ),
               ListViewCard(
                 title: 'Oscillation Speed',
                 subtitle: 'How fast the machine moves horizontally',
-                valueMax: drill.oscillationSpeedMax,
-                valueMin: drill.oscillationSpeedMin,
-                rangeMax: globals.oscillationSpeedMax,
-                rangeMin: globals.oscillationSpeedMin,
+                margin: EdgeInsets.fromLTRB(6, 12, 6, 12),
+                image: RangeVisualization(
+                  valueMax: drill.oscillationSpeedMax,
+                  valueMin: drill.oscillationSpeedMin,
+                  rangeMax: globals.oscillationSpeedMax,
+                  rangeMin: globals.oscillationSpeedMin,
+                ),
               ),
               ListViewCard(
                 title: 'Topspin',
                 subtitle: 'How much topspin each ball will have',
-                valueMax: drill.topspinMax,
-                valueMin: drill.topspinMin,
-                rangeMax: globals.oscillationSpeedMax,
-                rangeMin: globals.oscillationSpeedMin,
+                margin: EdgeInsets.fromLTRB(6, 12, 6, 12),
+                image: RangeVisualization(
+                  valueMax: drill.topspinMax,
+                  valueMin: drill.topspinMin,
+                  rangeMax: globals.oscillationSpeedMax,
+                  rangeMin: globals.oscillationSpeedMin,
+                ),
               ),
               ListViewCard(
                 title: 'Backspin',
                 subtitle: 'How much backspin each abll will have',
-                valueMax: drill.backspinMax,
-                valueMin: drill.backspinMin,
-                rangeMax: globals.oscillationSpeedMax,
-                rangeMin: globals.oscillationSpeedMin,
+                margin: EdgeInsets.fromLTRB(6, 12, 6, 12),
+                image: RangeVisualization(
+                  valueMax: drill.backspinMax,
+                  valueMin: drill.backspinMin,
+                  rangeMax: globals.oscillationSpeedMax,
+                  rangeMin: globals.oscillationSpeedMin,
+                ),
               ),
             ],
           ),
@@ -260,25 +270,46 @@ class DrillViewer extends StatelessWidget {
   }
 }
 
-class ListViewCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
+class AutomaticFiringDrillVisualization extends StatelessWidget {
+  final Drill drill;
+
+  const AutomaticFiringDrillVisualization({Key key, this.drill})
+      : super(key: key);
+
+  Color _getColorFromValue(int value, int rangeMax) {
+    double intensityWeight = (rangeMax - value) / rangeMax;
+
+    int red = ((1 - intensityWeight) * 255).floor();
+    int green = globals.accentColor.green;
+    int blue = ((intensityWeight) * 255).floor();
+
+    return Color.fromARGB(255, red, green, blue);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      // crossAxisAlignment: CrossAxisAlignment.stretch,
+      // mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+      ],
+    );
+  }
+}
+
+class RangeVisualization extends StatelessWidget {
   final int valueMax;
   final int valueMin;
   final double rangeMax;
   final double rangeMin;
 
-  const ListViewCard({
+  const RangeVisualization({
     Key key,
-    this.title,
-    this.subtitle,
     this.valueMax,
     this.valueMin,
     this.rangeMax,
     this.rangeMin,
-  }) : super(key: key);
-
-  // color form: 0xRRGGBBAA
+  });
 
   Color _getColorFromValue(int value) {
     double intensityWeight = (rangeMax - value) / rangeMax;
@@ -292,34 +323,56 @@ class ListViewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Container(
+      height: 165, // I got this value from trial and error I guess?
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [_getColorFromValue(valueMin), _getColorFromValue(valueMax)],
+        ),
+      ),
+    );
+  }
+}
+
+class ListViewCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final Widget image;
+  final Function onTap;
+  final EdgeInsets margin;
+
+  const ListViewCard({
+    Key key,
+    this.title,
+    this.subtitle,
+    this.image,
+    this.margin,
+    this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.fromLTRB(6, 12, 6, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          Expanded(
-            child: ClipRRect(
+      margin: margin,
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            ClipRRect(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(4),
                 topRight: Radius.circular(4),
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  // color: Colors.black38,
-                  // colors take the form 0xFFFFFFFF
-                  gradient: LinearGradient(colors: [
-                    _getColorFromValue(valueMax),
-                    _getColorFromValue(valueMin)
-                  ]),
-                ),
-              ),
+              child: image,
             ),
-          ),
-          Container(
+            Container(
               color: Colors.black12,
-              height: 1), // Divider() without padding essentially
-          Padding(
+              height: 1,
+            ), // Divider() without padding essentially
+            Padding(
               padding: EdgeInsets.fromLTRB(12, 12, 12, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -334,8 +387,10 @@ class ListViewCard extends StatelessWidget {
                     style: TextStyle(fontSize: 15, color: Colors.black45),
                   ),
                 ],
-              ))
-        ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

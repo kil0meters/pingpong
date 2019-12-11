@@ -98,8 +98,8 @@ class DrillEditorAutomatic extends StatelessWidget {
                         max: globals.backspinMax,
                         min: globals.topspinMin,
                         onChanged: (RangeValues values) async {
-                          editingDrill.topspinMin = values.start.floor();
-                          editingDrill.topspinMax = values.end.floor();
+                          editingDrill.backspinMin = values.start.floor();
+                          editingDrill.backspinMax = values.end.floor();
                         }),
                   ],
                 ),
