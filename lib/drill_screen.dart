@@ -1,90 +1,62 @@
 import 'package:flutter/material.dart';
-import 'package:morpheus/page_routes/morpheus_page_route.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:morpheus/morpheus.dart';
 
 import 'globals.dart' as globals;
 import 'drill_editor.dart';
+import 'main.dart';
 
 class Drill {
-  const Drill(
-      this.title,
-      this.description,
-      this.firingSpeedMax,
-      this.firingSpeedMin,
-      this.oscillationSpeedMax,
-      this.oscillationSpeedMin,
-      this.topspinMax,
-      this.topspinMin,
-      this.backspinMax,
-      this.backspinMin);
-  final String title;
-  final String description;
+  Drill(
+    this.title,
+    this.description,
+    this.firingSpeedMin,
+    this.firingSpeedMax,
+    this.oscillationSpeedMin,
+    this.oscillationSpeedMax,
+    this.topspinMin,
+    this.topspinMax,
+    this.backspinMin,
+    this.backspinMax,
+  );
 
-  final int firingSpeedMax;
-  final int firingSpeedMin;
-  final int oscillationSpeedMax;
-  final int oscillationSpeedMin;
-  final int topspinMax;
-  final int topspinMin;
-  final int backspinMax;
-  final int backspinMin;
+  String title;
+  String description;
+
+  int firingSpeedMax;
+  int firingSpeedMin;
+  int oscillationSpeedMax;
+  int oscillationSpeedMin;
+  int topspinMax;
+  int topspinMin;
+  int backspinMax;
+  int backspinMin;
 }
 
 class DrillScreen extends StatelessWidget {
-  final GlobalKey navigatorKey;
+  DrillScreen({Key key}) : super(key: key);
 
-  DrillScreen({Key key, this.navigatorKey}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Navigator(
-        key: navigatorKey,
-        onGenerateRoute: (RouteSettings settings) {
-          return MaterialPageRoute(
-              settings: settings,
-              builder: (BuildContext context) {
-                switch (settings.name) {
-                  case '/':
-                    return DrillList();
-                  case '/editor':
-                    return DrillEditorAutomatic();
-                  default:
-                    return Text('ERROR - This should never happen');
-                }
-              });
-        });
-  }
-}
-
-class DrillList extends StatefulWidget {
-  DrillList({Key key}) : super(key: key);
-
-  @override
-  _DrillListState createState() => _DrillListState();
-}
-
-class _DrillListState extends State<DrillList> {
-  List<Drill> drills = <Drill>[
-    Drill("Die", "Fast firing, no oscillation", 60, 70, 0, 0, 0, 0, 0, 0),
-    Drill("Lie", "Slow firing, lots of oscillation", 5, 10, 80, 100, 0, 20, 0,
-        20),
-    Drill("Kind", "Lots of back spin, medium firing", 20, 60, 30, 50, 0, 0, 90,
-        100),
-    Drill("Mind", "Lots of top spin, medium firing", 20, 60, 30, 50, 90, 100, 0,
-        0),
-    Drill(
-        "Randomonium",
-        "What is this, some kind of lottery?\n\n"
-        "This is probably useless for actual training but it seems fun I guess.",
-        5,
-        70,
-        0,
-        100,
-        0,
-        100,
-        0,
-        100),
-  ];
+  // drills = <Drill>[
+  //   Drill("Die", "Fast firing, no oscillation", 60, 70, 0, 0, 0, 0, 0, 0),
+  //   Drill("Lie", "Slow firing, lots of oscillation", 5, 10, 80, 100, 0, 20, 0,
+  //       20),
+  //   Drill("Kind", "Lots of back spin, medium firing", 20, 60, 30, 50, 0, 0, 90,
+  //       100),
+  //   Drill("Mind", "Lots of top spin, medium firing", 20, 60, 30, 50, 90, 100, 0,
+  //       0),
+  //   Drill(
+  //       "Randomonium",
+  //       "What is this, some kind of lottery?\n\n"
+  //           "This is probably useless for actual training but it seems fun I guess.",
+  //       5,
+  //       70,
+  //       0,
+  //       100,
+  //       0,
+  //       100,
+  //       0,
+  //       100),
+  // ];
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +68,7 @@ class _DrillListState extends State<DrillList> {
       body: Container(
           child: ListView(
         padding: EdgeInsets.all(12),
-        children: drills.map<Widget>((drill) {
+        children: PingPongRoot.of(context).drills.map<Widget>((drill) {
           final GlobalKey _parentKey = GlobalKey();
           return Card(
             key: _parentKey,

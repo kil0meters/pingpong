@@ -6,10 +6,40 @@ import 'remote_screen.dart';
 import 'drill_screen.dart';
 import 'settings_screen.dart';
 
-void main() => runApp(PongApp());
+void main() => runApp(PingPongRoot());
 
-class PongApp extends StatelessWidget {
+class PingPongRoot extends StatefulWidget {
   // This widget is the root of your application.
+  @override
+  PingPongRootState createState() => PingPongRootState();
+
+  static PingPongRootState of(BuildContext context) {
+    final PingPongRootState state =
+        context.ancestorStateOfType(const TypeMatcher<PingPongRootState>());
+
+    assert(() {
+      if (state == null) {
+        throw new FlutterError(
+            'PingPongRootState operation requested with a context that does '
+            'not include a PingPongRoot.');
+      }
+      return true;
+    }());
+
+    return state;
+  }
+}
+
+class PingPongRootState extends State<PingPongRoot> {
+  List<Drill> drills = [];
+
+  void addDrill(Drill drill) {
+    setState(() {
+      print('meme');
+      drills.add(drill);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -28,51 +58,42 @@ class PongApp extends StatelessWidget {
         primaryColor: Colors.blue,
         accentColor: globals.accentColor,
       ),
-      home: HomePage(),
+      home: PingPongContainer(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
+class PingPongContainer extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  PingPongContainerState createState() => PingPongContainerState();
 }
 
-class _HomePageState extends State<HomePage>
-    with TickerProviderStateMixin<HomePage> {
+class PingPongContainerState extends State<PingPongContainer>
+    with TickerProviderStateMixin<PingPongContainer> {
   int _currentIndex = 1;
-
-  // array storing navigator keys so the back buttin will work properly
-  //  class navigatorKeys {
-  //   drillScreen: GlobalKey<NavigatorState>();
-  //   remoteScreen: GlobalKey<NavigatorState>();
-  //   settingsScreen: GlobalKey<NavigatorState>();
-  // };
-
-  final navigatorKeys = <GlobalKey<NavigatorState>>[
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-  ];
 
   Widget build(BuildContext context) {
     return Scaffold(
-      body: WillPopScope(
-        // send signal to the proper state
-        onWillPop: () async =>
-            !await navigatorKeys[_currentIndex].currentState.maybePop(),
-        child: MorpheusTabView(
-          curve: Curves.easeInOutSine,
-          duration: Duration(milliseconds: 200),
-          child: IndexedStack(
-            index: _currentIndex,
-            children: <Widget>[
-              DrillScreen(navigatorKey: navigatorKeys[0]),
-              RemoteScreen(navigatorKey: navigatorKeys[1]),
-              SettingsScreen(navigatorKey: navigatorKeys[2]),
-            ],
-          ),
-        ),
+      body: Navigator(
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (BuildContext context) {
+              return MorpheusTabView(
+                curve: Curves.easeInOutSine,
+                duration: Duration(milliseconds: 200),
+                child: IndexedStack(
+                  index: _currentIndex,
+                  children: <Widget>[
+                    DrillScreen(),
+                    RemoteScreen(),
+                    SettingsScreen(),
+                  ],
+                ),
+              );
+            },
+          );
+        },
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

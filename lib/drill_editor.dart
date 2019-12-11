@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:expandable/expandable.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:pingpong/drill_screen.dart';
 
 import 'globals.dart' as globals;
 import 'sliders.dart';
+import 'main.dart';
+
+Drill editingDrill = Drill("title", "description", 0, 0,0 ,0 ,0, 0,0, 0);
 
 class DrillEditorAutomatic extends StatelessWidget {
-  DrillEditorAutomatic({Key key}) : super(key: key);
+
+  DrillEditorAutomatic({
+    Key key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +35,9 @@ class DrillEditorAutomatic extends StatelessWidget {
                       border: OutlineInputBorder(),
                       labelText: 'Title',
                     ),
+                    onChanged: (String value) {
+                      editingDrill.title = value;
+                    },
                   ),
                   SizedBox(height: 12), //
                   TextField(
@@ -37,6 +47,9 @@ class DrillEditorAutomatic extends StatelessWidget {
                       border: OutlineInputBorder(),
                       labelText: 'Description',
                     ),
+                    onChanged: (String value) {
+                      editingDrill.description = value;
+                    }
                   ),
                 ],
               ),
@@ -58,23 +71,36 @@ class DrillEditorAutomatic extends StatelessWidget {
                       title: "Firing Speed",
                       max: globals.firingSpeedMax,
                       min: globals.firingSpeedMin,
-                      onChanged: (RangeValues values) {},
+                      onChanged: (RangeValues values) async {
+                        editingDrill.firingSpeedMin = values.start.floor();
+                        editingDrill.firingSpeedMax = values.end.floor();
+                      },
                     ),
                     PingPongRangeSlider(
                         title: "Oscillation Speed",
                         max: globals.oscillationSpeedMax,
                         min: globals.oscillationSpeedMin,
-                        onChanged: (RangeValues values) {}),
+                        onChanged: (RangeValues values) async {
+                          editingDrill.oscillationSpeedMin = values.start.floor();
+                          editingDrill.oscillationSpeedMax = values.end.floor();
+                        },
+                      ),
                     PingPongRangeSlider(
                         title: "Topspin",
                         max: globals.topspinMax,
                         min: globals.topspinMin,
-                        onChanged: (RangeValues values) {}),
+                        onChanged: (RangeValues values) async {
+                          editingDrill.topspinMin = values.start.floor();
+                          editingDrill.topspinMax = values.end.floor();
+                        },),
                     PingPongRangeSlider(
                         title: "Backspin",
                         max: globals.backspinMax,
                         min: globals.topspinMin,
-                        onChanged: (RangeValues values) {}),
+                        onChanged: (RangeValues values) async {
+                          editingDrill.topspinMin = values.start.floor();
+                          editingDrill.topspinMax = values.end.floor();
+                        }),
                   ],
                 ),
               ),
@@ -95,13 +121,17 @@ class DrillEditorAutomatic extends StatelessWidget {
                 ),
               ),
             ),
+            SizedBox(height: 72,),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.save),
         backgroundColor: globals.accentColor,
-        onPressed: () {},
+        onPressed: () {
+          PingPongRoot.of(context).addDrill(editingDrill);
+          Navigator.of(context).pop();
+        },
       ),
     );
   }
@@ -123,7 +153,8 @@ class DrillEditorManual extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         backgroundColor: globals.accentColor,
         child: Icon(Icons.save),
-        onPressed: () {},
+        onPressed: () {
+        },
       ),
     );
   }
