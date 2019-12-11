@@ -7,16 +7,15 @@ import 'globals.dart' as globals;
 import 'sliders.dart';
 import 'main.dart';
 
-Drill editingDrill = Drill("title", "description", 0, 0,0 ,0 ,0, 0,0, 0);
-
 class DrillEditorAutomatic extends StatelessWidget {
-
   DrillEditorAutomatic({
     Key key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    Drill editingDrill = new Drill(title: "title", description: "description");
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Drill Editor (Automatic)'),
@@ -41,16 +40,15 @@ class DrillEditorAutomatic extends StatelessWidget {
                   ),
                   SizedBox(height: 12), //
                   TextField(
-                    keyboardType: TextInputType.multiline,
-                    maxLines: 8,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Description',
-                    ),
-                    onChanged: (String value) {
-                      editingDrill.description = value;
-                    }
-                  ),
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 8,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Description',
+                      ),
+                      onChanged: (String value) {
+                        editingDrill.description = value;
+                      }),
                 ],
               ),
             ),
@@ -72,34 +70,35 @@ class DrillEditorAutomatic extends StatelessWidget {
                       max: globals.firingSpeedMax,
                       min: globals.firingSpeedMin,
                       onChanged: (RangeValues values) async {
-                        editingDrill.firingSpeedMin = values.start.floor();
-                        editingDrill.firingSpeedMax = values.end.floor();
+                        editingDrill.firingSpeedMin = values.start;
+                        editingDrill.firingSpeedMax = values.end;
                       },
                     ),
                     PingPongRangeSlider(
-                        title: "Oscillation Speed",
-                        max: globals.oscillationSpeedMax,
-                        min: globals.oscillationSpeedMin,
-                        onChanged: (RangeValues values) async {
-                          editingDrill.oscillationSpeedMin = values.start.floor();
-                          editingDrill.oscillationSpeedMax = values.end.floor();
-                        },
-                      ),
+                      title: "Oscillation Speed",
+                      max: globals.oscillationSpeedMax,
+                      min: globals.oscillationSpeedMin,
+                      onChanged: (RangeValues values) async {
+                        editingDrill.oscillationSpeedMin = values.start;
+                        editingDrill.oscillationSpeedMax = values.end;
+                      },
+                    ),
                     PingPongRangeSlider(
-                        title: "Topspin",
-                        max: globals.topspinMax,
-                        min: globals.topspinMin,
-                        onChanged: (RangeValues values) async {
-                          editingDrill.topspinMin = values.start.floor();
-                          editingDrill.topspinMax = values.end.floor();
-                        },),
+                      title: "Topspin",
+                      max: globals.topspinMax,
+                      min: globals.topspinMin,
+                      onChanged: (RangeValues values) async {
+                        editingDrill.topspinMin = values.start;
+                        editingDrill.topspinMax = values.end;
+                      },
+                    ),
                     PingPongRangeSlider(
                         title: "Backspin",
                         max: globals.backspinMax,
                         min: globals.topspinMin,
                         onChanged: (RangeValues values) async {
-                          editingDrill.backspinMin = values.start.floor();
-                          editingDrill.backspinMax = values.end.floor();
+                          editingDrill.backspinMin = values.start;
+                          editingDrill.backspinMax = values.end;
                         }),
                   ],
                 ),
@@ -121,7 +120,9 @@ class DrillEditorAutomatic extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 72,),
+            SizedBox(
+              height: 72,
+            ),
           ],
         ),
       ),
@@ -129,7 +130,7 @@ class DrillEditorAutomatic extends StatelessWidget {
         child: Icon(Icons.save),
         backgroundColor: globals.accentColor,
         onPressed: () {
-          PingPongRoot.of(context).addDrill(editingDrill);
+          PingPongRoot.of(context).addDrill(Drill.copy(editingDrill));
           Navigator.of(context).pop();
         },
       ),
@@ -153,8 +154,7 @@ class DrillEditorManual extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         backgroundColor: globals.accentColor,
         child: Icon(Icons.save),
-        onPressed: () {
-        },
+        onPressed: () {},
       ),
     );
   }

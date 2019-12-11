@@ -2,17 +2,17 @@ library pingpong.globals;
 
 import 'package:flutter/material.dart';
 
-final double firingSpeedMax = 70;
-final double firingSpeedMin = 5;
+const double firingSpeedMax = 70;
+const double firingSpeedMin = 5;
 
-final double oscillationSpeedMax = 100;
-final double oscillationSpeedMin = 0;
+const double oscillationSpeedMax = 100;
+const double oscillationSpeedMin = 0;
 
-final double backspinMax = 100;
-final double backspinMin = 0;
+const double backspinMax = 100;
+const double backspinMin = 0;
 
-final double topspinMax = 100;
-final double topspinMin = 0;
+const double topspinMax = 100;
+const double topspinMin = 0;
 
 final Color accentColor = Colors.indigoAccent[700];
 final Color errorAccentColor = Colors.redAccent[700];

@@ -7,30 +7,45 @@ import 'drill_editor.dart';
 import 'main.dart';
 
 class Drill {
-  Drill(
+  Drill({
     this.title,
     this.description,
-    this.firingSpeedMin,
-    this.firingSpeedMax,
-    this.oscillationSpeedMin,
-    this.oscillationSpeedMax,
-    this.topspinMin,
-    this.topspinMax,
-    this.backspinMin,
-    this.backspinMax,
-  );
+    this.firingSpeedMin = globals.firingSpeedMin,
+    this.firingSpeedMax = globals.firingSpeedMax,
+    this.oscillationSpeedMin = globals.oscillationSpeedMin,
+    this.oscillationSpeedMax = globals.oscillationSpeedMax,
+    this.topspinMin = globals.topspinMin,
+    this.topspinMax = globals.topspinMax,
+    this.backspinMin = globals.backspinMin,
+    this.backspinMax = globals.backspinMax,
+  });
 
   String title;
   String description;
 
-  int firingSpeedMax;
-  int firingSpeedMin;
-  int oscillationSpeedMax;
-  int oscillationSpeedMin;
-  int topspinMax;
-  int topspinMin;
-  int backspinMax;
-  int backspinMin;
+  double firingSpeedMin;
+  double firingSpeedMax;
+  double oscillationSpeedMin;
+  double oscillationSpeedMax;
+  double topspinMin;
+  double topspinMax;
+  double backspinMin;
+  double backspinMax;
+
+  static Drill copy(Drill drill) {
+    return Drill(
+      title: drill.title,
+      description: drill.description,
+      firingSpeedMin: drill.firingSpeedMin,
+      firingSpeedMax: drill.firingSpeedMax,
+      oscillationSpeedMin: drill.oscillationSpeedMin,
+      oscillationSpeedMax: drill.oscillationSpeedMax,
+      topspinMin: drill.topspinMin,
+      topspinMax: drill.topspinMax,
+      backspinMin: drill.backspinMin,
+      backspinMax: drill.backspinMax,
+    );
+  } 
 }
 
 class DrillScreen extends StatelessWidget {
@@ -276,7 +291,7 @@ class AutomaticFiringDrillVisualization extends StatelessWidget {
   const AutomaticFiringDrillVisualization({Key key, this.drill})
       : super(key: key);
 
-  Color _getColorFromValue(int value, int rangeMax) {
+  Color _getColorFromValue(double value, double rangeMax) {
     double intensityWeight = (rangeMax - value) / rangeMax;
 
     int red = ((1 - intensityWeight) * 255).floor();
@@ -288,18 +303,32 @@ class AutomaticFiringDrillVisualization extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      // crossAxisAlignment: CrossAxisAlignment.stretch,
-      // mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-      ],
+    return Container(
+      height: 165, // I got this value from trial and error I guess?
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.bottomLeft,
+          end: Alignment.topRight,
+          colors: [
+            _getColorFromValue((drill.firingSpeedMin + drill.firingSpeedMax)/2, globals.firingSpeedMax),
+            // _getColorFromValue(drill.firingSpeedMax, globals.firingSpeedMax),
+            _getColorFromValue((drill.oscillationSpeedMin + drill.firingSpeedMax)/2, globals.oscillationSpeedMax),
+            // _getColorFromValue(drill.oscillationSpeedMax, globals.oscillationSpeedMax),
+            _getColorFromValue((drill.topspinMin + drill.topspinMax)/2, globals.topspinMax),
+            // _getColorFromValue(drill.topspinMax, globals.topspinMax),
+            _getColorFromValue((drill.backspinMin + drill.backspinMax)/2, globals.backspinMax),
+            // _getColorFromValue(drill.backspinMax, globals.backspinMax),
+          ],
+        ),
+      ),
     );
   }
 }
 
 class RangeVisualization extends StatelessWidget {
-  final int valueMax;
-  final int valueMin;
+  final double valueMax;
+  final double valueMin;
   final double rangeMax;
   final double rangeMin;
 
@@ -311,7 +340,7 @@ class RangeVisualization extends StatelessWidget {
     this.rangeMin,
   });
 
-  Color _getColorFromValue(int value) {
+  Color _getColorFromValue(double value) {
     double intensityWeight = (rangeMax - value) / rangeMax;
 
     int red = ((1 - intensityWeight) * 255).floor();
