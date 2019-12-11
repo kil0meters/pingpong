@@ -185,6 +185,7 @@ class _DrillSequenceEditorState extends State<DrillSequenceEditor> {
                       border: OutlineInputBorder(),
                       labelText: 'Title',
                     ),
+                    textCapitalization: TextCapitalization.words,
                   ),
                   SizedBox(height: 12), //
                   TextField(
@@ -194,6 +195,7 @@ class _DrillSequenceEditorState extends State<DrillSequenceEditor> {
                       border: OutlineInputBorder(),
                       labelText: 'Description',
                     ),
+                    textCapitalization: TextCapitalization.sentences,
                   ),
                 ],
               ),

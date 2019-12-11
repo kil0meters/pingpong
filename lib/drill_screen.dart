@@ -45,37 +45,21 @@ class Drill {
       backspinMin: drill.backspinMin,
       backspinMax: drill.backspinMax,
     );
-  } 
+  }
 }
 
-class DrillScreen extends StatelessWidget {
+class DrillScreen extends StatefulWidget {
   DrillScreen({Key key}) : super(key: key);
 
-  // drills = <Drill>[
-  //   Drill("Die", "Fast firing, no oscillation", 60, 70, 0, 0, 0, 0, 0, 0),
-  //   Drill("Lie", "Slow firing, lots of oscillation", 5, 10, 80, 100, 0, 20, 0,
-  //       20),
-  //   Drill("Kind", "Lots of back spin, medium firing", 20, 60, 30, 50, 0, 0, 90,
-  //       100),
-  //   Drill("Mind", "Lots of top spin, medium firing", 20, 60, 30, 50, 90, 100, 0,
-  //       0),
-  //   Drill(
-  //       "Randomonium",
-  //       "What is this, some kind of lottery?\n\n"
-  //           "This is probably useless for actual training but it seems fun I guess.",
-  //       5,
-  //       70,
-  //       0,
-  //       100,
-  //       0,
-  //       100,
-  //       0,
-  //       100),
-  // ];
+  @override
+  _DrillScreenState createState() => _DrillScreenState();
+}
 
+class _DrillScreenState extends State<DrillScreen>
+    with TickerProviderStateMixin<DrillScreen> {
   @override
   Widget build(BuildContext context) {
-    final drills = PingPongRoot.of(context).drills;
+    final drillList = PingPongRoot.of(context).drills;
 
     return Scaffold(
       appBar: AppBar(
@@ -85,26 +69,9 @@ class DrillScreen extends StatelessWidget {
       body: Container(
         child: ListView.builder(
           padding: EdgeInsets.fromLTRB(0, 0, 0, 96),
-          itemCount: drills.length,
-          itemBuilder: (BuildContext context, int index) {
-            final GlobalKey _parentKey = GlobalKey();
-            return ListViewCard(
-              key: _parentKey,
-              margin: EdgeInsets.fromLTRB(12, 12, 12, 0),
-              title: drills[index].title,
-              subtitle: drills[index].description,
-              image: AutomaticFiringDrillVisualization(drill: drills[index]),
-              onTap: () {
-                Navigator.of(context).push(
-                  MorpheusPageRoute(
-                    builder: (context) => new DrillViewer(drill: drills[index]),
-                    parentKey: _parentKey,
-                    transitionDuration: Duration(milliseconds: 300),
-                  ),
-                );
-              },
-            );
-          },
+          itemCount: drillList.length,
+          itemBuilder: (context, index) =>
+              _buildCard(context, index, drillList),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -117,6 +84,81 @@ class DrillScreen extends StatelessWidget {
         ),
         backgroundColor: globals.accentColor,
       ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, int index, List<Drill> drillList) {
+    // final GlobalKey _parentKey = GlobalKey();
+    Drill drill = drillList[index];
+    GlobalKey _parentKey = GlobalKey();
+
+    ListViewTile tile = ListViewTile(
+      // key: _parentKey,
+      title: drill.title,
+      subtitle: drill.description,
+      image: AutomaticFiringDrillVisualization(drill: drill),
+      onTap: () {
+        Navigator.of(context).push(
+          MorpheusPageRoute(
+            builder: (context) => new DrillViewer(drill: drill),
+            parentKey: _parentKey,
+            transitionDuration: Duration(milliseconds: 300),
+          ),
+        );
+      },
+    );
+
+    Draggable draggable = LongPressDraggable<Drill>(
+      data: drill,
+      maxSimultaneousDrags: 1,
+      child: tile,
+      childWhenDragging: SizedBox(),
+      feedback: Card(
+        child: ConstrainedBox(
+          constraints:
+              BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 24), // -24 is the padding value
+          child: tile,
+        ),
+        elevation: 4.0,
+      ),
+    );
+
+    return DragTarget<Drill>(
+      onWillAccept: (drill) {
+        return drillList.indexOf(drill) != index;
+      },
+      onAccept: (drill) {
+        // setState(() {
+        int currentIndex = drillList.indexOf(drill);
+        setState(() {
+          drillList.remove(drill);
+          drillList.insert(currentIndex > index ? index : index - 1, drill);
+        });
+        // });
+      },
+      builder: (BuildContext context, List<Drill> candidateData,
+          List<dynamic> rejectedData) {
+        return Column(
+          children: <Widget>[
+            AnimatedSize(
+              duration: Duration(milliseconds: 100),
+              vsync: this,
+              // vsync: this,
+              child: candidateData.isEmpty
+                  ? Container()
+                  : Opacity(
+                    opacity: 0,
+                    child: tile,
+                  )
+            ),
+            Card(
+              key: _parentKey,
+              margin: EdgeInsets.fromLTRB(12, 12, 12, 0),
+              child: candidateData.isEmpty ? draggable : tile,
+            )
+          ],
+        );
+      },
     );
   }
 
@@ -196,48 +238,56 @@ class DrillViewer extends StatelessWidget {
           CarouselSlider(
             height: 256.0,
             items: <Widget>[
-              ListViewCard(
-                title: 'Firing Speed',
-                subtitle: 'How fast the machine fires',
+              Card(
                 margin: EdgeInsets.fromLTRB(6, 12, 6, 12),
-                image: RangeVisualization(
-                  valueMax: drill.firingSpeedMax,
-                  valueMin: drill.firingSpeedMin,
-                  rangeMax: globals.firingSpeedMax,
-                  rangeMin: globals.firingSpeedMin,
+                child: ListViewTile(
+                  title: 'Firing Speed',
+                  subtitle: 'How fast the machine fires',
+                  image: RangeVisualization(
+                    valueMax: drill.firingSpeedMax,
+                    valueMin: drill.firingSpeedMin,
+                    rangeMax: globals.firingSpeedMax,
+                    rangeMin: globals.firingSpeedMin,
+                  ),
                 ),
               ),
-              ListViewCard(
-                title: 'Oscillation Speed',
-                subtitle: 'How fast the machine moves horizontally',
+              Card(
                 margin: EdgeInsets.fromLTRB(6, 12, 6, 12),
-                image: RangeVisualization(
-                  valueMax: drill.oscillationSpeedMax,
-                  valueMin: drill.oscillationSpeedMin,
-                  rangeMax: globals.oscillationSpeedMax,
-                  rangeMin: globals.oscillationSpeedMin,
+                child: ListViewTile(
+                  title: 'Oscillation Speed',
+                  subtitle: 'How fast the machine moves horizontally',
+                  image: RangeVisualization(
+                    valueMax: drill.oscillationSpeedMax,
+                    valueMin: drill.oscillationSpeedMin,
+                    rangeMax: globals.oscillationSpeedMax,
+                    rangeMin: globals.oscillationSpeedMin,
+                  ),
                 ),
               ),
-              ListViewCard(
-                title: 'Topspin',
-                subtitle: 'How much topspin each ball will have',
+              Card(
                 margin: EdgeInsets.fromLTRB(6, 12, 6, 12),
-                image: RangeVisualization(
-                  valueMax: drill.topspinMax,
-                  valueMin: drill.topspinMin,
-                  rangeMax: globals.oscillationSpeedMax,
-                  rangeMin: globals.oscillationSpeedMin,
+                child: ListViewTile(
+                  title: 'Topspin',
+                  subtitle: 'How much topspin each ball will have',
+                  image: RangeVisualization(
+                    valueMax: drill.topspinMax,
+                    valueMin: drill.topspinMin,
+                    rangeMax: globals.oscillationSpeedMax,
+                    rangeMin: globals.oscillationSpeedMin,
+                  ),
                 ),
               ),
-              ListViewCard(
-                title: 'Backspin',
-                subtitle: 'How much backspin each abll will have',
+              Card(
                 margin: EdgeInsets.fromLTRB(6, 12, 6, 12),
-                image: RangeVisualization(
-                  valueMax: drill.backspinMax,
-                  valueMin: drill.backspinMin,
-                  rangeMax: globals.oscillationSpeedMax,
-                  rangeMin: globals.oscillationSpeedMin,
+                child: ListViewTile(
+                  title: 'Backspin',
+                  subtitle: 'How much backspin each abll will have',
+                  image: RangeVisualization(
+                    valueMax: drill.backspinMax,
+                    valueMin: drill.backspinMin,
+                    rangeMax: globals.oscillationSpeedMax,
+                    rangeMin: globals.oscillationSpeedMin,
+                  ),
                 ),
               ),
             ],
@@ -311,13 +361,19 @@ class AutomaticFiringDrillVisualization extends StatelessWidget {
           begin: Alignment.bottomLeft,
           end: Alignment.topRight,
           colors: [
-            _getColorFromValue((drill.firingSpeedMin + drill.firingSpeedMax)/2, globals.firingSpeedMax),
+            _getColorFromValue(
+                (drill.firingSpeedMin + drill.firingSpeedMax) / 2,
+                globals.firingSpeedMax),
             // _getColorFromValue(drill.firingSpeedMax, globals.firingSpeedMax),
-            _getColorFromValue((drill.oscillationSpeedMin + drill.firingSpeedMax)/2, globals.oscillationSpeedMax),
+            _getColorFromValue(
+                (drill.oscillationSpeedMin + drill.firingSpeedMax) / 2,
+                globals.oscillationSpeedMax),
             // _getColorFromValue(drill.oscillationSpeedMax, globals.oscillationSpeedMax),
-            _getColorFromValue((drill.topspinMin + drill.topspinMax)/2, globals.topspinMax),
+            _getColorFromValue(
+                (drill.topspinMin + drill.topspinMax) / 2, globals.topspinMax),
             // _getColorFromValue(drill.topspinMax, globals.topspinMax),
-            _getColorFromValue((drill.backspinMin + drill.backspinMax)/2, globals.backspinMax),
+            _getColorFromValue((drill.backspinMin + drill.backspinMax) / 2,
+                globals.backspinMax),
             // _getColorFromValue(drill.backspinMax, globals.backspinMax),
           ],
         ),
@@ -364,62 +420,57 @@ class RangeVisualization extends StatelessWidget {
   }
 }
 
-class ListViewCard extends StatelessWidget {
+class ListViewTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final Widget image;
   final Function onTap;
-  final EdgeInsets margin;
 
-  const ListViewCard({
+  const ListViewTile({
     Key key,
     this.title,
     this.subtitle,
     this.image,
-    this.margin,
     this.onTap,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: margin,
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(4),
-                topRight: Radius.circular(4),
-              ),
-              child: image,
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(4),
+              topRight: Radius.circular(4),
             ),
-            Container(
-              color: Colors.black12,
-              height: 1,
-            ), // Divider() without padding essentially
-            Padding(
-              padding: EdgeInsets.fromLTRB(12, 12, 12, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    this.title,
-                    style: TextStyle(fontSize: 15),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    this.subtitle,
-                    style: TextStyle(fontSize: 15, color: Colors.black45),
-                  ),
-                ],
-              ),
-            )
-          ],
-        ),
+            child: image,
+          ),
+          Container(
+            color: Colors.black12,
+            height: 1,
+          ), // Divider() without padding essentially
+          Padding(
+            padding: EdgeInsets.fromLTRB(12, 12, 12, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  this.title,
+                  style: TextStyle(fontSize: 15),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  this.subtitle,
+                  style: TextStyle(fontSize: 15, color: Colors.black45),
+                ),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }

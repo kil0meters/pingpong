@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'globals.dart' as globals;
-
 class PingPongSlider extends StatefulWidget {
   final String title;
   final String unit;
