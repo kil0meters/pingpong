@@ -47,11 +47,12 @@ class _PingPongSliderState extends State<PingPongSlider> {
           max: widget.max,
           min: widget.min,
           onChanged: (newValue) {
-            widget.onChanged(newValue);
-
             setState(() {
               sliderValue = newValue;
             });
+          },
+          onChangeEnd: (newValue) {
+            widget.onChanged(newValue);
           },
           label: sliderValue.toString(),
           value: sliderValue,

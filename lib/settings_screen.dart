@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:pingpong/globals.dart' as globals;
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     Key key,
@@ -38,6 +40,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       labelText: 'Server Address',
                       helperText: 'The IP address of your Rasperry Pi',
                     ),
+                    onChanged: (value) {
+                      setState(() {
+                        globals.serverUrl = value;
+                      });
+                    },
                   ),
                   SizedBox(height: 12), // --------------------
                   TextField(
