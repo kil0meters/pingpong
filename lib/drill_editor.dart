@@ -70,8 +70,8 @@ class DrillEditorAutomatic extends StatelessWidget {
                       max: globals.firingSpeedMax,
                       min: globals.firingSpeedMin,
                       onChanged: (RangeValues values) async {
-                        editingDrill.firingSpeedMin = values.start;
-                        editingDrill.firingSpeedMax = values.end;
+                        editingDrill.firingSpeedMin = values.start.floor();
+                        editingDrill.firingSpeedMax = values.end.floor();
                       },
                     ),
                     PingPongRangeSlider(
@@ -79,8 +79,8 @@ class DrillEditorAutomatic extends StatelessWidget {
                       max: globals.oscillationSpeedMax,
                       min: globals.oscillationSpeedMin,
                       onChanged: (RangeValues values) async {
-                        editingDrill.oscillationSpeedMin = values.start;
-                        editingDrill.oscillationSpeedMax = values.end;
+                        editingDrill.oscillationSpeedMin = values.start.floor();
+                        editingDrill.oscillationSpeedMax = values.end.floor();
                       },
                     ),
                     PingPongRangeSlider(
@@ -88,8 +88,8 @@ class DrillEditorAutomatic extends StatelessWidget {
                       max: globals.topspinMax,
                       min: globals.topspinMin,
                       onChanged: (RangeValues values) async {
-                        editingDrill.topspinMin = values.start;
-                        editingDrill.topspinMax = values.end;
+                        editingDrill.topspinMin = values.start.floor();
+                        editingDrill.topspinMax = values.end.floor();
                       },
                     ),
                     PingPongRangeSlider(
@@ -97,8 +97,8 @@ class DrillEditorAutomatic extends StatelessWidget {
                         max: globals.backspinMax,
                         min: globals.topspinMin,
                         onChanged: (RangeValues values) async {
-                          editingDrill.backspinMin = values.start;
-                          editingDrill.backspinMax = values.end;
+                          editingDrill.backspinMin = values.start.floor();
+                          editingDrill.backspinMax = values.end.floor();
                         }),
                   ],
                 ),

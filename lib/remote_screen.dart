@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'sliders.dart';
 import 'globals.dart' as globals;
 
+enum PresetAction { save, load }
+
 class RemoteScreen extends StatefulWidget {
   const RemoteScreen({
     Key key,
@@ -15,10 +17,7 @@ class RemoteScreen extends StatefulWidget {
 }
 
 class _RemoteScreenState extends State<RemoteScreen> {
-  int currentFiringSpeed = 0;
-  int currentOscillationSpeed = 0;
-  int currentTopspin = 0;
-  int currentBackspin = 0;
+  String presetName;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +25,55 @@ class _RemoteScreenState extends State<RemoteScreen> {
       appBar: AppBar(
         title: Text('Remote'),
         backgroundColor: Colors.deepPurple,
-        
+        actions: <Widget>[
+          PopupMenuButton<PresetAction>(
+            icon: Icon(Icons.more_vert),
+            onSelected: (PresetAction action) {
+              if (action == PresetAction.save) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Enter a name for the preset'),
+                      content: TextField(
+                        decoration: InputDecoration(hintText: "Preset Name"),
+                        onChanged: (value) {
+                          presetName = value;
+                        },
+                      ),
+                      actions: <Widget>[
+                        FlatButton(
+                          child: new Text('Cancel'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        FlatButton(
+                          child: Text('Save'),
+                          onPressed: () {
+                            savePreset(presetName);
+                            Navigator.of(context).pop();
+                          }
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+            },
+            itemBuilder: (BuildContext context) =>
+                <PopupMenuEntry<PresetAction>>[
+              PopupMenuItem(
+                child: Text('Load preset'),
+                value: PresetAction.load,
+              ),
+              PopupMenuItem(
+                child: Text('Save preset'),
+                value: PresetAction.save,
+              )
+            ],
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -44,12 +91,13 @@ class _RemoteScreenState extends State<RemoteScreen> {
                       unit: 'balls per minute',
                       max: globals.firingSpeedMax,
                       min: globals.firingSpeedMin,
-                      onChanged: (value) async {
-                        currentFiringSpeed = value.floor();
-                        if (globals.isFiring) {
+                      initialValue: globals.currentFiringSpeed.toDouble(),
+                      onChanged: (value) {
+                        globals.currentFiringSpeed = value.floor();
+                        if (globals.serverUrl != '') {
                           try {
                             http.get(Uri.http('${globals.serverUrl}',
-                                '/api/v1/set-firing-speed/$currentFiringSpeed'));
+                                '/api/v1/set-firing-speed/${globals.currentFiringSpeed}'));
                           } catch (error) {
                             print('$error');
                           }
@@ -61,12 +109,13 @@ class _RemoteScreenState extends State<RemoteScreen> {
                       unit: 'rotations per minute',
                       max: globals.oscillationSpeedMax,
                       min: globals.oscillationSpeedMin,
+                      initialValue: globals.currentOscillationSpeed.toDouble(),
                       onChanged: (value) async {
-                        currentOscillationSpeed = value.floor();
-                        if (globals.isFiring) {
+                        globals.currentOscillationSpeed = value.floor();
+                        if (globals.serverUrl != '') {
                           try {
                             http.get(Uri.http('${globals.serverUrl}',
-                                '/api/v1/set-oscillation-speed/$currentOscillationSpeed'));
+                                '/api/v1/set-oscillation-speed/${globals.currentOscillationSpeed}'));
                           } catch (error) {
                             print('$error');
                           }
@@ -77,12 +126,13 @@ class _RemoteScreenState extends State<RemoteScreen> {
                       title: "Backspin",
                       max: globals.backspinMax,
                       min: globals.backspinMin,
+                      initialValue: globals.currentBackspin.toDouble(),
                       onChanged: (value) async {
-                        currentBackspin = value.floor();
-                        if (globals.isFiring) {
+                        globals.currentBackspin = value.floor();
+                        if (globals.serverUrl != '') {
                           try {
                             http.get(Uri.http('${globals.serverUrl}',
-                                '/api/v1/set-backspin/$currentBackspin'));
+                                '/api/v1/set-backspin/${globals.currentBackspin}'));
                           } catch (error) {
                             print('$error');
                           }
@@ -93,12 +143,13 @@ class _RemoteScreenState extends State<RemoteScreen> {
                       title: "Topspin",
                       max: globals.topspinMax,
                       min: globals.topspinMin,
+                      initialValue: globals.currentTopspin.toDouble(),
                       onChanged: (value) async {
-                        currentTopspin = value.floor();
-                        if (globals.isFiring) {
+                        globals.currentTopspin = value.floor();
+                        if (globals.serverUrl != '') {
                           try {
                             http.get(Uri.http('${globals.serverUrl}',
-                                '/api/v1/set-topspin/$currentTopspin'));
+                                '/api/v1/set-topspin/${globals.currentTopspin}'));
                           } catch (error) {
                             print('$error');
                           }
@@ -116,22 +167,24 @@ class _RemoteScreenState extends State<RemoteScreen> {
                 height: 48,
                 child: RaisedButton(
                   child: Text(
-                    globals.isFiring ? "TURN OFF" : "TURN ON",
+                    globals.firingState ? "TURN OFF" : "TURN ON",
                     style: TextStyle(
                       color: Colors.white,
                     ),
                   ),
-                  color: globals.isFiring
+                  color: globals.firingState
                       ? globals.errorAccentColor
                       : globals.accentColor,
-                  onPressed: () async {
-                    if (globals.isFiring) {
-                      stopFiring();
-                    } else {
-                      startFiring();
+                  onPressed: () async { // TODO: could go wrong if request fails
+                    if (globals.serverUrl != '') {
+                      try {
+                        http.get(Uri.http('${globals.serverUrl}', '/api/v1/toggle-firing-state'));
+                      } catch (error) {
+                        print("$error");
+                      }
                     }
                     setState(() {
-                      globals.isFiring = !globals.isFiring;
+                      globals.firingState = !globals.firingState;
                     });
                   },
                 ),
@@ -143,30 +196,15 @@ class _RemoteScreenState extends State<RemoteScreen> {
     );
   }
 
-  void startFiring() {
-    try {
-      http.get(Uri.http('${globals.serverUrl}',
-          '/api/v1/set-firing-speed/$currentFiringSpeed'));
-      http.get(Uri.http('${globals.serverUrl}',
-          '/api/v1/set-oscillation-speed/$currentOscillationSpeed'));
-      http.get(Uri.http(
-          '${globals.serverUrl}', '/api/v1/set-topspin/$currentTopspin'));
-      http.get(Uri.http(
-          '${globals.serverUrl}', '/api/v1/set-backspin/$currentBackspin'));
-    } catch (error) {
-      print('$error');
-    }
-  }
-
-  void stopFiring() {
-    try {
-      http.get(Uri.http('${globals.serverUrl}', '/api/v1/set-firing-speed/0'));
-      http.get(
-          Uri.http('${globals.serverUrl}', '/api/v1/set-oscillation-speed/0'));
-      http.get(Uri.http('${globals.serverUrl}', '/api/v1/set-topspin/0'));
-      http.get(Uri.http('${globals.serverUrl}', '/api/v1/set-backspin/0'));
-    } catch (error) {
-      print('$error');
+  void savePreset(name) {
+    if (globals.serverUrl != '') {
+      try {
+        http.get('http://${globals.serverUrl}/api/v1/add-preset?name=$name'
+                 '&firingSpeed=${globals.currentFiringSpeed}&oscillationSpeed=${globals.currentOscillationSpeed}'
+                 '&topspin=${globals.currentTopspin}&backspin=${globals.currentBackspin}');
+      } catch (error) {
+        print('$error');
+      }
     }
   }
 }

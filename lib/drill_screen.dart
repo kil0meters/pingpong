@@ -23,14 +23,14 @@ class Drill {
   String title;
   String description;
 
-  double firingSpeedMin;
-  double firingSpeedMax;
-  double oscillationSpeedMin;
-  double oscillationSpeedMax;
-  double topspinMin;
-  double topspinMax;
-  double backspinMin;
-  double backspinMax;
+  int firingSpeedMin;
+  int firingSpeedMax;
+  int oscillationSpeedMin;
+  int oscillationSpeedMax;
+  int topspinMin;
+  int topspinMax;
+  int backspinMin;
+  int backspinMax;
 
   static Drill copy(Drill drill) {
     return Drill(
@@ -363,17 +363,17 @@ class AutomaticFiringDrillVisualization extends StatelessWidget {
           colors: [
             _getColorFromValue(
                 (drill.firingSpeedMin + drill.firingSpeedMax) / 2,
-                globals.firingSpeedMax),
+                globals.firingSpeedMax.toDouble()),
             // _getColorFromValue(drill.firingSpeedMax, globals.firingSpeedMax),
             _getColorFromValue(
                 (drill.oscillationSpeedMin + drill.firingSpeedMax) / 2,
-                globals.oscillationSpeedMax),
+                globals.oscillationSpeedMax.toDouble()),
             // _getColorFromValue(drill.oscillationSpeedMax, globals.oscillationSpeedMax),
             _getColorFromValue(
-                (drill.topspinMin + drill.topspinMax) / 2, globals.topspinMax),
+                (drill.topspinMin + drill.topspinMax) / 2, globals.topspinMax.toDouble()),
             // _getColorFromValue(drill.topspinMax, globals.topspinMax),
             _getColorFromValue((drill.backspinMin + drill.backspinMax) / 2,
-                globals.backspinMax),
+                globals.backspinMax.toDouble()),
             // _getColorFromValue(drill.backspinMax, globals.backspinMax),
           ],
         ),
@@ -383,10 +383,10 @@ class AutomaticFiringDrillVisualization extends StatelessWidget {
 }
 
 class RangeVisualization extends StatelessWidget {
-  final double valueMax;
-  final double valueMin;
-  final double rangeMax;
-  final double rangeMin;
+  final int valueMax;
+  final int valueMin;
+  final int rangeMax;
+  final int rangeMin;
 
   const RangeVisualization({
     Key key,
@@ -396,7 +396,7 @@ class RangeVisualization extends StatelessWidget {
     this.rangeMin,
   });
 
-  Color _getColorFromValue(double value) {
+  Color _getColorFromValue(int value) {
     double intensityWeight = (rangeMax - value) / rangeMax;
 
     int red = ((1 - intensityWeight) * 255).floor();

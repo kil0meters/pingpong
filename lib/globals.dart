@@ -1,21 +1,55 @@
 library pingpong.globals;
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
-const double firingSpeedMax = 255;
-const double firingSpeedMin = 0;
+const int firingSpeedMax = 255;
+const int firingSpeedMin = 0;
 
-const double oscillationSpeedMax = 255;
-const double oscillationSpeedMin = 0;
+const int oscillationSpeedMax = 255;
+const int oscillationSpeedMin = 0;
 
-const double backspinMax = 255;
-const double backspinMin = 0;
+const int backspinMax = 255;
+const int backspinMin = 0;
 
-const double topspinMax = 255;
-const double topspinMin = 0;
+const int topspinMax = 255;
+const int topspinMin = 0;
 
 final Color accentColor = Colors.indigoAccent[700];
 final Color errorAccentColor = Colors.redAccent[700];
 
-String serverUrl = '10.0.2.2'; // development port/url (10.0.2.2 redirects to localhost in Android emu)
-bool isFiring = false;
+int currentFiringSpeed = 0;
+int currentOscillationSpeed = 0;
+int currentTopspin = 0;
+int currentBackspin = 0;
+bool firingState = false;
+
+String serverUrl = '';
+
+Future<bool> initializeValues() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  serverUrl = (prefs.getString('serverUrl') ?? '');
+
+  if (serverUrl != '') {
+    http.Response machineStateResponse = await http.get(Uri.http('$serverUrl', '/api/v1/get-machine-state'));
+    if (machineStateResponse.statusCode == 200) {
+      Map<String, dynamic> machineState = json.decode(machineStateResponse.body);
+      currentFiringSpeed = machineState['firingSpeed'];
+      currentOscillationSpeed = machineState['oscillationSpeed'];
+      currentTopspin = machineState['topspin'];
+      currentBackspin = machineState['backspin'];
+      firingState = machineState['firingState'];
+
+      print('Preloaded configuraiton form server: $serverUrl');
+      print('currentFiringSpeed: $currentFiringSpeed');
+      print('currentOscillationSpeed: $currentOscillationSpeed');
+      print('currentTopspin: $currentTopspin');
+      print('currentBackspin: $currentBackspin');
+      print('firingState: $firingState');
+    }
+  }
+
+  return true;
+}

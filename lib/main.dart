@@ -41,6 +41,12 @@ class PingPongRootState extends State<PingPongRoot> {
   }
 
   @override
+  void initState()  {
+    globals.initializeValues();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PingPong',
@@ -58,7 +64,16 @@ class PingPongRootState extends State<PingPongRoot> {
         primaryColor: Colors.blue,
         accentColor: globals.accentColor,
       ),
-      home: PingPongContainer(),
+      home: FutureBuilder<bool>(
+        future: globals.initializeValues(),
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return PingPongContainer();
+          } else {
+            return Text("loading");
+          }
+        }
+      ),
     );
   }
 }

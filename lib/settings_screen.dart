@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:pingpong/globals.dart' as globals;
 
@@ -12,6 +13,13 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  @override
+  void initState() {
+    // _serverUrlController.text = globals.serverUrl;
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,16 +42,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
               padding: EdgeInsets.all(12),
               child: Column(
                 children: <Widget>[
-                  TextField(
+                  TextFormField(
+                    initialValue: globals.serverUrl,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Server Address',
                       helperText: 'The IP address of your Rasperry Pi',
                     ),
-                    onChanged: (value) {
+                    onChanged: (value) async {
                       setState(() {
                         globals.serverUrl = value;
                       });
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      prefs.setString('serverUrl', value);
                     },
                   ),
                   SizedBox(height: 12), // --------------------
