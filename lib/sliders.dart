@@ -1,24 +1,41 @@
 import 'package:flutter/material.dart';
 
+import 'app_state.dart';
+
 class PingPongSlider extends StatefulWidget {
   final String title;
   final String unit;
+  final String parameterName;
   final int max;
   final int min;
-  final double initialValue;
 
   final Function(double) onChanged; 
  
-  PingPongSlider({this.title, this.unit = "", this.max, this.min, this.initialValue, this.onChanged});
+  PingPongSlider({
+    this.title,
+    this.unit = "",
+    this.max,
+    this.min,
+    this.parameterName,
+    this.onChanged,
+  }) : super(key: ObjectKey(title));
 
   @override
-  _PingPongSliderState createState() => _PingPongSliderState(sliderValue: (initialValue == null ? 128 : initialValue));
+  _PingPongSliderState createState() => _PingPongSliderState();
 }
 
 class _PingPongSliderState extends State<PingPongSlider> {
   double sliderValue;
 
   _PingPongSliderState({Key key, this.sliderValue});
+
+  // only call AppState when it's requested
+  @override
+  void didChangeDependencies() {
+    AppState appState = AppState.of(context);
+    sliderValue = appState.data[widget.parameterName].toDouble();
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {

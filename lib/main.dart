@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:morpheus/morpheus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
+import 'dart:convert';
 
 import 'globals.dart' as globals;
 import 'remote_screen.dart';
 import 'drill_screen.dart';
 import 'settings_screen.dart';
+import 'app_state.dart';
 
 void main() => runApp(PingPongRoot());
 
@@ -64,16 +69,17 @@ class PingPongRootState extends State<PingPongRoot> {
         primaryColor: Colors.blue,
         accentColor: globals.accentColor,
       ),
-      home: FutureBuilder<bool>(
-        future: globals.initializeValues(),
-        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return PingPongContainer();
-          } else {
-            return Text("loading");
-          }
-        }
-      ),
+      home: AppState(child: PingPongContainer()),
+      // home: FutureBuilder<bool>(
+      //   future: globals.initializeValues(),
+      //   builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+      //     if (snapshot.connectionState == ConnectionState.done) {
+      //       return AppState(child: PingPongContainer());
+      //     } else {
+      //       return Text("loading");
+      //     }
+      //   }
+      // ),
     );
   }
 }
@@ -86,6 +92,36 @@ class PingPongContainer extends StatefulWidget {
 class PingPongContainerState extends State<PingPongContainer>
     with TickerProviderStateMixin<PingPongContainer> {
   int _currentIndex = 1;
+
+  @override
+  void didChangeDependencies() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    globals.serverUrl = (prefs.getString('serverUrl') ?? '');
+
+    if (globals.serverUrl != '') {
+      http.Response machineStateResponse = await http.get(Uri.http('${globals.serverUrl}', '/api/v1/get-machine-state'));
+      if (machineStateResponse.statusCode == 200) {
+        AppState appState = AppState.of(context);
+
+        Map<String, dynamic> machineState = json.decode(machineStateResponse.body);
+        appState.setFiringSpeed(machineState['firingSpeed']);
+        appState.setOscillationSpeed(machineState['oscillationSpeed']);
+        appState.setTopspin(machineState['topspin']);
+        appState.setBackspin(machineState['backspin']);
+        appState.setFiringState(machineState['firingState']);
+
+        print(appState.data);
+
+        // print('Preloaded configuraiton form server: $serverUrl');
+        // print('currentFiringSpeed: $currentFiringSpeed');
+        // print('currentOscillationSpeed: $currentOscillationSpeed');
+        // print('currentTopspin: $currentTopspin');
+        // print('currentBackspin: $currentBackspin');
+        // print('firingState: $firingState');
+      }
+    }
+    super.didChangeDependencies();
+  }
 
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
