@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:pingpong/networking.dart';
 
 import 'sliders.dart';
 import 'globals.dart' as globals;
@@ -88,34 +89,27 @@ class _RemoteScreenState extends State<RemoteScreen> {
           ),
         ],
       ),
-      body: new SingleChildScrollView(
-        child: new Column(
+      body: SingleChildScrollView(
+        child: appState.data['isLoading'] ? Text('loading') : Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            new Card(
+            Card(
               margin: EdgeInsets.all(12),
-              child: new Padding(
+              child: Padding(
                 padding: EdgeInsets.all(12),
-                child: new Column(
+                child: Column(
                   children: <Widget>[
                     PingPongSlider(
                       title: 'Firing Speed',
                       unit: 'balls per minute',
                       max: globals.firingSpeedMax,
                       min: globals.firingSpeedMin,
-                      // key: firingSpeedSliderKey,
                       parameterName: 'firingSpeed',
                       onChanged: (value) {
-                        appState.data["firingSpeed"] = value.floor();
-                        if (globals.serverUrl != '') {
-                          try {
-                            http.get(Uri.http('${globals.serverUrl}',
-                                '/api/v1/set-firing-speed/${appState.data["firingSpeed"]}'));
-                          } catch (error) {
-                            print('$error');
-                          }
-                        }
+                        appState.setFiringSpeed(value.floor());
+                        serverRequest(context, appState.getServerUrl(),
+                            '/api/v1/set-firing-speed/${appState.data["firingSpeed"]}');
                       },
                     ),
                     PingPongSlider(
@@ -123,36 +117,12 @@ class _RemoteScreenState extends State<RemoteScreen> {
                       unit: 'rotations per minute',
                       max: globals.oscillationSpeedMax,
                       min: globals.oscillationSpeedMin,
-                      // key: oscillationSpeedSliderKey,
+                      initialValue: appState.data['firingSpeed'] == 0 ? 100 : 100,
                       parameterName: 'oscillationSpeed',
-                      onChanged: (value) async {
-                        globals.currentOscillationSpeed = value.floor();
-                        if (globals.serverUrl != '') {
-                          try {
-                            http.get(Uri.http('${globals.serverUrl}',
-                                '/api/v1/set-oscillation-speed/${globals.currentOscillationSpeed}'));
-                          } catch (error) {
-                            print('$error');
-                          }
-                        }
-                      },
-                    ),
-                    PingPongSlider(
-                      title: "Backspin",
-                      max: globals.backspinMax,
-                      min: globals.backspinMin,
-                      // key: backspinSliderKey,
-                      parameterName: 'backspin',
-                      onChanged: (value) async {
-                        globals.currentBackspin = value.floor();
-                        if (globals.serverUrl != '') {
-                          try {
-                            http.get(Uri.http('${globals.serverUrl}',
-                                '/api/v1/set-backspin/${globals.currentBackspin}'));
-                          } catch (error) {
-                            print('$error');
-                          }
-                        }
+                      onChanged: (value) {
+                        appState.setOscillationSpeed(value.floor());
+                        serverRequest(context, appState.getServerUrl(),
+                            '/api/v1/set-oscillation-speed/${appState.data["oscillationSpeed"]}');
                       },
                     ),
                     PingPongSlider(
@@ -160,19 +130,23 @@ class _RemoteScreenState extends State<RemoteScreen> {
                       max: globals.topspinMax,
                       min: globals.topspinMin,
                       parameterName: 'topspin',
-                      // key: topspinSliderKey,
-                      onChanged: (value) async {
-                        globals.currentTopspin = value.floor();
-                        if (globals.serverUrl != '') {
-                          try {
-                            http.get(Uri.http('${globals.serverUrl}',
-                                '/api/v1/set-topspin/${globals.currentTopspin}'));
-                          } catch (error) {
-                            print('$error');
-                          }
-                        }
+                      onChanged: (value) {
+                        appState.setTopspin(value.floor());
+                        serverRequest(context, appState.getServerUrl(),
+                            '/api/v1/set-topspin/${appState.data["topspin"]}');
                       },
                     ),
+                    PingPongSlider(
+                      title: "Backspin",
+                      max: globals.backspinMax,
+                      min: globals.backspinMin,
+                      parameterName: 'backspin',
+                      onChanged: (value) {
+                        appState.setBackspin(value.floor());
+                        serverRequest(context, appState.getServerUrl(),
+                            '/api/v1/set-backspin/${appState.data["backspin"]}');
+                      },
+                    )
                   ],
                 ),
               ),
@@ -192,18 +166,12 @@ class _RemoteScreenState extends State<RemoteScreen> {
                   color: appState.data['firingState']
                       ? globals.errorAccentColor
                       : globals.accentColor,
-                  onPressed: () async {
+                  onPressed: () {
                     // TODO: could go wrong if request fails
-                    if (globals.serverUrl != '') {
-                      try {
-                        http.get(Uri.http('${globals.serverUrl}',
-                            '/api/v1/toggle-firing-state'));
-                      } catch (error) {
-                        print("$error");
-                      }
-                    }
+                    serverRequest(context, appState.getServerUrl(),
+                        '/api/v1/toggle-firing-state');
                     setState(() {
-                      globals.firingState = !globals.firingState;
+                      appState.setFiringState(!appState.data['firingState']);
                     });
                   },
                 ),
@@ -218,22 +186,27 @@ class _RemoteScreenState extends State<RemoteScreen> {
   void savePreset(String name) {
     AppState appState = AppState.of(context);
 
-    if (globals.serverUrl != '') {
+    if (appState.getServerUrl() != '') {
       try {
-        http.get('http://${globals.serverUrl}/api/v1/add-preset?name=$name'
-            '&firingSpeed=${appState.data["firingSpeed"]}&oscillationSpeed=${globals.currentOscillationSpeed}'
-            '&topspin=${globals.currentTopspin}&backspin=${globals.currentBackspin}');
+        http.get(
+            'http://${appState.getServerUrl()}/api/v1/add-preset?name=$name'
+            '&firingSpeed=${appState.data["firingSpeed"]}&oscillationSpeed=${appState.data["oscillationSpeed"]}'
+            '&topspin=${appState.data["topspin"]}&backspin=${appState.data["backspin"]}');
       } catch (error) {
-        print('$error');
+        Scaffold.of(context).showSnackBar(
+          errorSnackBar('Could not find server'),
+        );
       }
     }
   }
 
   Future<List<RemotePreset>> loadPresets() async {
-    if (globals.serverUrl != '') {
+    AppState appState = AppState.of(context);
+
+    if (appState.getServerUrl() != '') {
       try {
-        http.Response response = await http.get(
-            Uri.http('${globals.serverUrl}', '/api/v1/list-remote-presets'));
+        http.Response response = await http.get(Uri.http(
+            '${appState.getServerUrl()}', '/api/v1/list-remote-presets'));
 
         Iterable list = jsonDecode(response.body);
         List<RemotePreset> presets =
@@ -241,31 +214,22 @@ class _RemoteScreenState extends State<RemoteScreen> {
 
         return presets;
       } catch (error) {
-        print('$error');
+        Scaffold.of(context).showSnackBar(
+          errorSnackBar('Could not find server'),
+        );
       }
     }
     return [];
   }
 
-  void updateRemote(RemotePreset preset) async {
-    if (globals.serverUrl != '') {
-      try {
-        http.get(Uri.http('${globals.serverUrl}', '/api/v1/set-machine-state-to-preset/${preset.uuid}'));
+  void updateRemote(RemotePreset preset) {
+    AppState appState = AppState.of(context);
+    serverRequest(context, appState.getServerUrl(), '/api/v1/set-machine-state-to-preset/${preset.uuid}');
 
-        AppState appState = AppState.of(context);
-
-        this.setState(() {
-          appState.data['firingSpeed'] = preset.firingSpeed;
-          appState.data['oscillationSpeed'] = preset.oscillationSpeed;
-          appState.data['topspin'] = preset.topspin;
-          appState.data['backspin'] = preset.topspin;
-        });
-
-        print(appState.data);
-      } catch (error) {
-        print('$error');
-      }
-    }
+    appState.data['firingSpeed'] = preset.firingSpeed;
+    appState.data['oscillationSpeed'] = preset.oscillationSpeed;
+    appState.data['topspin'] = preset.topspin;
+    appState.data['backspin'] = preset.backspin;
   }
 }
 
@@ -306,8 +270,8 @@ class RemotePreset {
 }
 
 class RemotePresetList extends StatefulWidget {
-  List<RemotePreset> presets;
-  Function updateRemoteCallback;
+  final List<RemotePreset> presets;
+  final Function updateRemoteCallback;
 
   RemotePresetList({
     this.presets,

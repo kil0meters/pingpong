@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:pingpong/globals.dart' as globals;
+import 'app_state.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -22,6 +22,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppState appState = AppState.of(context);
+    RegExp ipValidatorRegex = RegExp(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$');
+
+    final _formKey = GlobalKey<FormState>();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Settings'),
@@ -40,34 +45,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
             margin: EdgeInsets.all(12),
             child: Padding(
               padding: EdgeInsets.all(12),
-              child: Column(
-                children: <Widget>[
-                  TextFormField(
-                    initialValue: globals.serverUrl,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Server Address',
-                      helperText: 'The IP address of your Rasperry Pi',
+              child: Form(
+                key: _formKey,
+                autovalidate: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    TextFormField(
+                      initialValue: appState.data['serverUrl'],
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Server Address',
+                        helperText: 'The IP address of your Rasperry Pi',
+                      ),
+                      onChanged: (value) async {
+                        if (ipValidatorRegex.hasMatch(value.trim())) {
+                          appState.setServerUrl(value.trim());
+                          print("set value to: $value");
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          prefs.setString('serverUrl', value);
+                        }
+                      },
+                      validator: (value) {
+                        if (!ipValidatorRegex.hasMatch(value.trim())) {
+                          return 'Invalid IP address';
+                        }
+                        return null;
+                      }
                     ),
-                    onChanged: (value) async {
-                      setState(() {
-                        globals.serverUrl = value;
-                      });
-                      SharedPreferences prefs = await SharedPreferences.getInstance();
-                      prefs.setString('serverUrl', value);
-                    },
-                  ),
-                  SizedBox(height: 12), // --------------------
-                  TextField(
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Authorization Key',
-                      helperText:
-                          'Go to Authorized Devices > New in the web portal',
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

@@ -6,6 +6,7 @@ class PingPongSlider extends StatefulWidget {
   final String title;
   final String unit;
   final String parameterName;
+  final int initialValue;
   final int max;
   final int min;
 
@@ -16,6 +17,7 @@ class PingPongSlider extends StatefulWidget {
     this.unit = "",
     this.max,
     this.min,
+    this.initialValue = 0,
     this.parameterName,
     this.onChanged,
   }) : super(key: ObjectKey(title));
@@ -25,14 +27,15 @@ class PingPongSlider extends StatefulWidget {
 }
 
 class _PingPongSliderState extends State<PingPongSlider> {
-  double sliderValue;
+  double sliderValue = 100.0;
 
-  _PingPongSliderState({Key key, this.sliderValue});
+  _PingPongSliderState({Key key});
 
   // only call AppState when it's requested
   @override
   void didChangeDependencies() {
     AppState appState = AppState.of(context);
+    // print(appState.data);
     sliderValue = appState.data[widget.parameterName].toDouble();
     super.didChangeDependencies();
   }

@@ -10,6 +10,7 @@ import 'remote_screen.dart';
 import 'drill_screen.dart';
 import 'settings_screen.dart';
 import 'app_state.dart';
+import 'networking.dart';
 
 void main() => runApp(PingPongRoot());
 
@@ -40,15 +41,8 @@ class PingPongRootState extends State<PingPongRoot> {
 
   void addDrill(Drill drill) {
     setState(() {
-      print('meme');
       drills.add(drill);
     });
-  }
-
-  @override
-  void initState()  {
-    globals.initializeValues();
-    super.initState();
   }
 
   @override
@@ -93,31 +87,31 @@ class PingPongContainerState extends State<PingPongContainer>
     with TickerProviderStateMixin<PingPongContainer> {
   int _currentIndex = 1;
 
-  @override
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+
   void didChangeDependencies() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    globals.serverUrl = (prefs.getString('serverUrl') ?? '');
+    AppState appState = AppState.of(context);
 
-    if (globals.serverUrl != '') {
-      http.Response machineStateResponse = await http.get(Uri.http('${globals.serverUrl}', '/api/v1/get-machine-state'));
-      if (machineStateResponse.statusCode == 200) {
-        AppState appState = AppState.of(context);
+    appState.setServerUrl(prefs.getString('serverUrl') ?? '');
 
-        Map<String, dynamic> machineState = json.decode(machineStateResponse.body);
+    if (appState.getServerUrl() != '') {
+      try {
+        http.Response machineStateResponse = await http.get(Uri.http(
+            '${appState.getServerUrl()}', '/api/v1/get-machine-state'));
+
+        Map<String, dynamic> machineState =
+            json.decode(machineStateResponse.body);
+
         appState.setFiringSpeed(machineState['firingSpeed']);
         appState.setOscillationSpeed(machineState['oscillationSpeed']);
         appState.setTopspin(machineState['topspin']);
         appState.setBackspin(machineState['backspin']);
         appState.setFiringState(machineState['firingState']);
-
-        print(appState.data);
-
-        // print('Preloaded configuraiton form server: $serverUrl');
-        // print('currentFiringSpeed: $currentFiringSpeed');
-        // print('currentOscillationSpeed: $currentOscillationSpeed');
-        // print('currentTopspin: $currentTopspin');
-        // print('currentBackspin: $currentBackspin');
-        // print('firingState: $firingState');
+        appState.finishedLoading();
+      } catch (error) {
+        scaffoldKey.currentState
+            .showSnackBar(errorSnackBar('Could not find server'));
       }
     }
     super.didChangeDependencies();
@@ -127,6 +121,7 @@ class PingPongContainerState extends State<PingPongContainer>
 
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       body: WillPopScope(
         onWillPop: () async => !await navigatorKey.currentState.maybePop(),
         child: Navigator(
