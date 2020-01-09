@@ -98,7 +98,8 @@ class PingPongContainerState extends State<PingPongContainer>
     if (appState.getServerUrl() != '') {
       try {
         http.Response machineStateResponse = await http.get(Uri.http(
-            '${appState.getServerUrl()}', '/api/v1/get-machine-state'));
+            '${appState.getServerUrl()}', '/api/v1/get-machine-state'))
+            .timeout(Duration(seconds: 2));
 
         Map<String, dynamic> machineState =
             json.decode(machineStateResponse.body);
@@ -108,12 +109,16 @@ class PingPongContainerState extends State<PingPongContainer>
         appState.setTopspin(machineState['topspin']);
         appState.setBackspin(machineState['backspin']);
         appState.setFiringState(machineState['firingState']);
-        appState.finishedLoading();
       } catch (error) {
         scaffoldKey.currentState
             .showSnackBar(errorSnackBar('Could not find server'));
       }
     }
+
+    setState(() {
+      appState.finishedLoading();
+    });
+    print('done');
     super.didChangeDependencies();
   }
 
