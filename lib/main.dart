@@ -7,7 +7,8 @@ import 'dart:convert';
 
 import 'globals.dart' as globals;
 import 'remote_screen.dart';
-import 'drill_screen.dart';
+import 'drill_screen/drill_screen.dart';
+import 'drill_screen/drill_editor_automatic.dart';
 import 'settings_screen.dart';
 import 'app_state.dart';
 import 'networking.dart';
@@ -37,9 +38,9 @@ class PingPongRoot extends StatefulWidget {
 }
 
 class PingPongRootState extends State<PingPongRoot> {
-  List<Drill> drills = [];
+  List<AutomaticDrill> drills = [];
 
-  void addDrill(Drill drill) {
+  void addAutomaticDrill(AutomaticDrill drill) {
     setState(() {
       drills.add(drill);
     });

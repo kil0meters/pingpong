@@ -2,51 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:morpheus/morpheus.dart';
 
-import 'globals.dart' as globals;
-import 'drill_editor.dart';
-import 'main.dart';
-
-class Drill {
-  Drill({
-    this.title,
-    this.description,
-    this.firingSpeedMin = globals.firingSpeedMin,
-    this.firingSpeedMax = globals.firingSpeedMax,
-    this.oscillationSpeedMin = globals.oscillationSpeedMin,
-    this.oscillationSpeedMax = globals.oscillationSpeedMax,
-    this.topspinMin = globals.topspinMin,
-    this.topspinMax = globals.topspinMax,
-    this.backspinMin = globals.backspinMin,
-    this.backspinMax = globals.backspinMax,
-  });
-
-  String title;
-  String description;
-
-  int firingSpeedMin;
-  int firingSpeedMax;
-  int oscillationSpeedMin;
-  int oscillationSpeedMax;
-  int topspinMin;
-  int topspinMax;
-  int backspinMin;
-  int backspinMax;
-
-  static Drill copy(Drill drill) {
-    return Drill(
-      title: drill.title,
-      description: drill.description,
-      firingSpeedMin: drill.firingSpeedMin,
-      firingSpeedMax: drill.firingSpeedMax,
-      oscillationSpeedMin: drill.oscillationSpeedMin,
-      oscillationSpeedMax: drill.oscillationSpeedMax,
-      topspinMin: drill.topspinMin,
-      topspinMax: drill.topspinMax,
-      backspinMin: drill.backspinMin,
-      backspinMax: drill.backspinMax,
-    );
-  }
-}
+import 'package:pingpong/globals.dart' as globals;
+import 'package:pingpong/drill_screen/drill_editor_automatic.dart';
+import 'package:pingpong/drill_screen/drill_editor_manual.dart';
+import 'package:pingpong/main.dart';
 
 class DrillScreen extends StatefulWidget {
   DrillScreen({Key key}) : super(key: key);
@@ -87,9 +46,9 @@ class _DrillScreenState extends State<DrillScreen>
     );
   }
 
-  Widget _buildCard(BuildContext context, int index, List<Drill> drillList) {
+  Widget _buildCard(BuildContext context, int index, List<AutomaticDrill> drillList) {
     // final GlobalKey _parentKey = GlobalKey();
-    Drill drill = drillList[index];
+    AutomaticDrill drill = drillList[index];
     GlobalKey _parentKey = GlobalKey();
 
     ListViewTile tile = ListViewTile(
@@ -108,7 +67,7 @@ class _DrillScreenState extends State<DrillScreen>
       },
     );
 
-    Draggable draggable = LongPressDraggable<Drill>(
+    Draggable draggable = LongPressDraggable<AutomaticDrill>(
       data: drill,
       maxSimultaneousDrags: 1,
       child: tile,
@@ -123,7 +82,7 @@ class _DrillScreenState extends State<DrillScreen>
       ),
     );
 
-    return DragTarget<Drill>(
+    return DragTarget<AutomaticDrill>(
       onWillAccept: (drill) {
         return drillList.indexOf(drill) != index;
       },
@@ -136,7 +95,7 @@ class _DrillScreenState extends State<DrillScreen>
         });
         // });
       },
-      builder: (BuildContext context, List<Drill> candidateData,
+      builder: (BuildContext context, List<AutomaticDrill> candidateData,
           List<dynamic> rejectedData) {
         return Column(
           children: <Widget>[
@@ -176,7 +135,7 @@ class _DrillScreenState extends State<DrillScreen>
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => DrillEditorManual(),
+                    builder: (context) => ManualDrillEditor(),
                   ),
                 );
               },
@@ -187,7 +146,7 @@ class _DrillScreenState extends State<DrillScreen>
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => DrillEditorAutomatic(),
+                    builder: (context) => AutomaticDrillEditor(),
                   ),
                 );
               },
@@ -200,7 +159,7 @@ class _DrillScreenState extends State<DrillScreen>
 }
 
 class DrillViewer extends StatelessWidget {
-  final Drill drill;
+  final AutomaticDrill drill;
 
   const DrillViewer({
     Key key,
@@ -336,7 +295,7 @@ class DrillViewer extends StatelessWidget {
 }
 
 class AutomaticFiringDrillVisualization extends StatelessWidget {
-  final Drill drill;
+  final AutomaticDrill drill;
 
   const AutomaticFiringDrillVisualization({Key key, this.drill})
       : super(key: key);
