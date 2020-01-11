@@ -61,7 +61,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: (value) async {
                         if (ipValidatorRegex.hasMatch(value.trim())) {
                           appState.setServerUrl(value.trim());
-                          print("set value to: $value");
                           SharedPreferences prefs = await SharedPreferences.getInstance();
                           prefs.setString('serverUrl', value);
                         }
