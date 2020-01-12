@@ -1,11 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:morpheus/morpheus.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:pingpong/globals.dart' as globals;
 import 'package:pingpong/drill_screen/drill_editor_automatic.dart';
 import 'package:pingpong/drill_screen/drill_editor_manual.dart';
-import 'package:pingpong/main.dart';
+import 'package:pingpong/drill_screen/drill_viewer_automatic.dart';
+import 'package:pingpong/app_state.dart';
+import 'package:pingpong/networking.dart';
 
 class DrillScreen extends StatefulWidget {
   DrillScreen({Key key}) : super(key: key);
@@ -16,22 +20,93 @@ class DrillScreen extends StatefulWidget {
 
 class _DrillScreenState extends State<DrillScreen>
     with TickerProviderStateMixin<DrillScreen> {
+
+  AnimationController _controller;
+  Animation _animation;
+  CurvedAnimation _curve;
+
+  Future<List<AutomaticDrill>> fetchDrillList() async {
+    AppState appState = AppState.of(context);
+
+    http.Response response = await serverRequest(context, appState.getServerUrl(), '/api/v1/list-automatic-drills')
+      .timeout(Duration(seconds: 2));
+
+    var responseJson = json.decode(response.body);
+
+    List<AutomaticDrill> drills = [];
+
+    for (var drill in responseJson) {
+      drills.add(AutomaticDrill.fromJSON(drill));
+    }
+
+    return drills;
+  }
+
+  void initState() {
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
+
+    _curve = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    );
+
+    _animation = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(_curve);
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final drillList = PingPongRoot.of(context).drills;
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Drills'),
         backgroundColor: Colors.green,
       ),
-      body: Container(
-        child: ListView.builder(
-          padding: EdgeInsets.fromLTRB(0, 0, 0, 96),
-          itemCount: drillList.length,
-          itemBuilder: (context, index) =>
-              _buildCard(context, index, drillList),
-        ),
+      body: FutureBuilder(
+        future: fetchDrillList(),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          Widget child;
+
+          if (snapshot.hasData) {
+            _controller.forward();
+
+            child = FadeTransition(
+              opacity: _animation,
+              child: ListView.builder(
+                padding: EdgeInsets.fromLTRB(0, 0, 0, 96),
+                itemCount: snapshot.data.length,
+                itemBuilder: (context, index) =>
+                  _buildCard(context, index, snapshot.data),
+              ),
+            );
+          } else if (snapshot.hasError) {
+            child = Text('${snapshot.error}');
+          } else {
+            child = Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                SizedBox(
+                  height: 60,
+                  width: 60,
+                  child: CircularProgressIndicator(),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Text('Loading...'),
+                )
+              ],
+            );
+          }
+
+          return Container(child: child,);
+        }
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -59,7 +134,7 @@ class _DrillScreenState extends State<DrillScreen>
       onTap: () {
         Navigator.of(context).push(
           MorpheusPageRoute(
-            builder: (context) => new DrillViewer(drill: drill),
+            builder: (context) => new AutomaticDrillViewer(drill: drill),
             parentKey: _parentKey,
             transitionDuration: Duration(milliseconds: 300),
           ),
@@ -133,7 +208,7 @@ class _DrillScreenState extends State<DrillScreen>
               child: Text('Manual'),
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).push(
+                globals.rootNaviagatorKey.currentState.push(
                   MaterialPageRoute(
                     builder: (context) => ManualDrillEditor(),
                   ),
@@ -144,7 +219,7 @@ class _DrillScreenState extends State<DrillScreen>
               child: Text('Automatic'),
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).push(
+                globals.rootNaviagatorKey.currentState.push(
                   MaterialPageRoute(
                     builder: (context) => AutomaticDrillEditor(),
                   ),
@@ -158,226 +233,6 @@ class _DrillScreenState extends State<DrillScreen>
   }
 }
 
-class DrillViewer extends StatelessWidget {
-  final AutomaticDrill drill;
-
-  const DrillViewer({
-    Key key,
-    this.drill,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        iconTheme: IconThemeData(
-          color: Colors.black,
-        ),
-        title: Text(
-          drill.title,
-          style: TextStyle(
-            color: Colors.black,
-          ),
-        ),
-        actions: <Widget>[
-          PopupMenuButton(
-            icon: Icon(Icons.more_vert),
-            itemBuilder: (BuildContext context) => <PopupMenuEntry>[
-              PopupMenuItem(
-                child: Text('Edit'),
-              )
-            ],
-          ),
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          CarouselSlider(
-            height: 256.0,
-            items: <Widget>[
-              Card(
-                margin: EdgeInsets.fromLTRB(6, 12, 6, 12),
-                child: ListViewTile(
-                  title: 'Firing Speed',
-                  subtitle: 'How fast the machine fires',
-                  image: RangeVisualization(
-                    valueMax: drill.firingSpeedMax,
-                    valueMin: drill.firingSpeedMin,
-                    rangeMax: globals.firingSpeedMax,
-                    rangeMin: globals.firingSpeedMin,
-                  ),
-                ),
-              ),
-              Card(
-                margin: EdgeInsets.fromLTRB(6, 12, 6, 12),
-                child: ListViewTile(
-                  title: 'Oscillation Speed',
-                  subtitle: 'How fast the machine moves horizontally',
-                  image: RangeVisualization(
-                    valueMax: drill.oscillationSpeedMax,
-                    valueMin: drill.oscillationSpeedMin,
-                    rangeMax: globals.oscillationSpeedMax,
-                    rangeMin: globals.oscillationSpeedMin,
-                  ),
-                ),
-              ),
-              Card(
-                margin: EdgeInsets.fromLTRB(6, 12, 6, 12),
-                child: ListViewTile(
-                  title: 'Topspin',
-                  subtitle: 'How much topspin each ball will have',
-                  image: RangeVisualization(
-                    valueMax: drill.topspinMax,
-                    valueMin: drill.topspinMin,
-                    rangeMax: globals.oscillationSpeedMax,
-                    rangeMin: globals.oscillationSpeedMin,
-                  ),
-                ),
-              ),
-              Card(
-                margin: EdgeInsets.fromLTRB(6, 12, 6, 12),
-                child: ListViewTile(
-                  title: 'Backspin',
-                  subtitle: 'How much backspin each abll will have',
-                  image: RangeVisualization(
-                    valueMax: drill.backspinMax,
-                    valueMin: drill.backspinMin,
-                    rangeMax: globals.oscillationSpeedMax,
-                    rangeMin: globals.oscillationSpeedMin,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
-            child: Text(
-              'Description',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: Card(
-              margin: EdgeInsets.all(12),
-              child: Padding(
-                padding: EdgeInsets.all(12),
-                child: Text(
-                  drill.description,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: RaisedButton(
-                color: globals.accentColor,
-                child: Text(
-                  'START DRILL',
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                onPressed: () {},
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class AutomaticFiringDrillVisualization extends StatelessWidget {
-  final AutomaticDrill drill;
-
-  const AutomaticFiringDrillVisualization({Key key, this.drill})
-      : super(key: key);
-
-  Color _getColorFromValue(double value, double rangeMax) {
-    double intensityWeight = (rangeMax - value) / rangeMax;
-
-    int red = ((1 - intensityWeight) * 255).floor();
-    int green = globals.accentColor.green;
-    int blue = ((intensityWeight) * 255).floor();
-
-    return Color.fromARGB(255, red, green, blue);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 165, // I got this value from trial and error I guess?
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.bottomLeft,
-          end: Alignment.topRight,
-          colors: [
-            _getColorFromValue(
-                (drill.firingSpeedMin + drill.firingSpeedMax) / 2,
-                globals.firingSpeedMax.toDouble()),
-            // _getColorFromValue(drill.firingSpeedMax, globals.firingSpeedMax),
-            _getColorFromValue(
-                (drill.oscillationSpeedMin + drill.firingSpeedMax) / 2,
-                globals.oscillationSpeedMax.toDouble()),
-            // _getColorFromValue(drill.oscillationSpeedMax, globals.oscillationSpeedMax),
-            _getColorFromValue(
-                (drill.topspinMin + drill.topspinMax) / 2, globals.topspinMax.toDouble()),
-            // _getColorFromValue(drill.topspinMax, globals.topspinMax),
-            _getColorFromValue((drill.backspinMin + drill.backspinMax) / 2,
-                globals.backspinMax.toDouble()),
-            // _getColorFromValue(drill.backspinMax, globals.backspinMax),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class RangeVisualization extends StatelessWidget {
-  final int valueMax;
-  final int valueMin;
-  final int rangeMax;
-  final int rangeMin;
-
-  const RangeVisualization({
-    Key key,
-    this.valueMax,
-    this.valueMin,
-    this.rangeMax,
-    this.rangeMin,
-  });
-
-  Color _getColorFromValue(int value) {
-    double intensityWeight = (rangeMax - value) / rangeMax;
-
-    int red = ((1 - intensityWeight) * 255).floor();
-    int green = globals.accentColor.green;
-    int blue = ((intensityWeight) * 255).floor();
-
-    return Color.fromARGB(255, red, green, blue);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 165, // I got this value from trial and error I guess?
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [_getColorFromValue(valueMin), _getColorFromValue(valueMax)],
-        ),
-      ),
-    );
-  }
-}
 
 class ListViewTile extends StatelessWidget {
   final String title;

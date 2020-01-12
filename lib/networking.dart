@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-Future<http.Response> serverRequest(BuildContext context, String serverUrl, String apiRequest) async {
+Future<http.Response> serverRequest(BuildContext context, String serverUrl, String apiRequest, {Map<String, String> params}) async {
   http.Response response;
   if (serverUrl != ':5858') {
     try {
-      response = await http.get(Uri.http(serverUrl, apiRequest));
+      response = await http.get(Uri.http(serverUrl, apiRequest, params));
     } catch (error) {
       print('Error making request to $serverUrl$apiRequest: $error');
       Scaffold.of(context).showSnackBar(

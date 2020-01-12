@@ -35,7 +35,6 @@ class _PingPongSliderState extends State<PingPongSlider> {
   @override
   void didChangeDependencies() {
     AppState appState = AppState.of(context);
-    // print(appState.data);
     sliderValue = appState.data[widget.parameterName].toDouble();
     super.didChangeDependencies();
   }

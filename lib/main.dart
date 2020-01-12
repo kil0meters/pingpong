@@ -20,21 +20,6 @@ class PingPongRoot extends StatefulWidget {
   @override
   PingPongRootState createState() => PingPongRootState();
 
-  static PingPongRootState of(BuildContext context) {
-    final PingPongRootState state =
-        context.ancestorStateOfType(const TypeMatcher<PingPongRootState>());
-
-    assert(() {
-      if (state == null) {
-        throw new FlutterError(
-            'PingPongRootState operation requested with a context that does '
-            'not include a PingPongRoot.');
-      }
-      return true;
-    }());
-
-    return state;
-  }
 }
 
 class PingPongRootState extends State<PingPongRoot> {
@@ -96,7 +81,7 @@ class PingPongContainerState extends State<PingPongContainer>
 
     appState.setServerUrl(prefs.getString('serverUrl') ?? '');
 
-    if (appState.getServerUrl() != '') {
+    if (appState.getServerUrl() != ':5858') {
       try {
         http.Response machineStateResponse = await http.get(Uri.http(
             '${appState.getServerUrl()}', '/api/v1/get-machine-state'))
@@ -119,19 +104,16 @@ class PingPongContainerState extends State<PingPongContainer>
     setState(() {
       appState.finishedLoading();
     });
-    print('done');
     super.didChangeDependencies();
   }
-
-  GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
       body: WillPopScope(
-        onWillPop: () async => !await navigatorKey.currentState.maybePop(),
+        onWillPop: () async => !await globals.rootNaviagatorKey.currentState.maybePop(),
         child: Navigator(
-          key: navigatorKey,
+          key: globals.rootNaviagatorKey,
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute(
               settings: settings,

@@ -5,46 +5,93 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:fast_noise/fast_noise.dart';
 
 import 'package:pingpong/globals.dart' as globals;
-import 'package:pingpong/main.dart';
+import 'package:pingpong/networking.dart';
+import 'package:pingpong/app_state.dart';
 
 class AutomaticDrill {
   AutomaticDrill({
-    this.title,
-    this.description,
-    this.firingSpeedMin = globals.firingSpeedMin,
-    this.firingSpeedMax = globals.firingSpeedMax,
-    this.oscillationSpeedMin = globals.oscillationSpeedMin,
-    this.oscillationSpeedMax = globals.oscillationSpeedMax,
-    this.topspinMin = globals.topspinMin,
-    this.topspinMax = globals.topspinMax,
-    this.backspinMin = globals.backspinMin,
-    this.backspinMax = globals.backspinMax,
+    this.title = 'title',
+    this.description = 'description',
+    this.id,
+    this.listIndex,
+    this.firingSpeedMin = 0,
+    this.firingSpeedMax = 255,
+    this.firingSpeedFactor = 8,
+    this.oscillationSpeedMin = 0,
+    this.oscillationSpeedMax = 255,
+    this.oscillationSpeedFactor = 8,
+    this.topspinMin = 0,
+    this.topspinMax = 255,
+    this.topspinFactor = 8,
+    this.backspinMin = 0,
+    this.backspinMax = 255,
+    this.backspinFactor = 8,
   });
 
   String title;
   String description;
 
+  String id;
+  int listIndex;
+
   int firingSpeedMin;
   int firingSpeedMax;
+  int firingSpeedFactor;
   int oscillationSpeedMin;
   int oscillationSpeedMax;
+  int oscillationSpeedFactor;
   int topspinMin;
   int topspinMax;
+  int topspinFactor;
   int backspinMin;
   int backspinMax;
+  int backspinFactor;
 
-  static AutomaticDrill copy(AutomaticDrill drill) {
+  bool addToServer(context) {
+    AppState appState = AppState.of(context);
+
+    serverRequest(
+      context,
+      appState.getServerUrl(),
+      '/api/v1/add-automatic-drill',
+      params: {
+        'title': '$title',
+        'description': '$description',
+        'firing-speed-max': '$firingSpeedMax',
+        'firing-speed-min': '$firingSpeedMin',
+        'firing-speed-factor': '$firingSpeedFactor',
+        'oscillation-speed-max': '$oscillationSpeedMax',
+        'oscillation-speed-min': '$oscillationSpeedMin',
+        'oscillation-speed-factor': '$oscillationSpeedFactor',
+        'topspin-max': '$topspinMax',
+        'topspin-min': '$topspinMin',
+        'topspin-factor': '$topspinFactor',
+        'backspin-max': '$backspinMax',
+        'backspin-min': '$backspinMin',
+        'backspin-factor': '$backspinFactor',
+      },
+    );
+    return true;
+  }
+
+  static AutomaticDrill fromJSON(Map<dynamic, dynamic> value) {
     return AutomaticDrill(
-      title: drill.title,
-      description: drill.description,
-      firingSpeedMin: drill.firingSpeedMin,
-      firingSpeedMax: drill.firingSpeedMax,
-      oscillationSpeedMin: drill.oscillationSpeedMin,
-      oscillationSpeedMax: drill.oscillationSpeedMax,
-      topspinMin: drill.topspinMin,
-      topspinMax: drill.topspinMax,
-      backspinMin: drill.backspinMin,
-      backspinMax: drill.backspinMax,
+      title: value['title'],
+      description: value['description'],
+      id: value['uuid'],
+      listIndex: value['listIndex'],
+      firingSpeedMin: value['firingSpeed']['min'],
+      firingSpeedMax: value['firingSpeed']['max'],
+      firingSpeedFactor: value['firingSpeed']['noiseFactor'],
+      oscillationSpeedMin: value['oscillationSpeed']['min'],
+      oscillationSpeedMax: value['oscillationSpeed']['max'],
+      oscillationSpeedFactor: value['oscillationSpeed']['noiseFactor'],
+      topspinMin: value['topspin']['min'],
+      topspinMax: value['topspin']['max'],
+      topspinFactor: value['topspin']['noiseFactor'],
+      backspinMin: value['backspin']['min'],
+      backspinMax: value['backspin']['max'],
+      backspinFactor: value['backspin']['noiseFactor'],
     );
   }
 }
@@ -56,11 +103,10 @@ class AutomaticDrillEditor extends StatelessWidget {
 
   final formKey = GlobalKey<FormState>();
 
+  final AutomaticDrill editingDrill = AutomaticDrill();
+
   @override
   Widget build(BuildContext context) {
-    AutomaticDrill editingDrill =
-        new AutomaticDrill(title: "title", description: "description");
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Drill Editor (Automatic)'),
@@ -85,7 +131,7 @@ class AutomaticDrillEditor extends StatelessWidget {
                           ),
                           textCapitalization: TextCapitalization.words,
                           onChanged: (String value) {
-                            editingDrill.title = value;
+                            editingDrill.title = value.trim();
                           },
                           validator: (text) {
                             if (text == '') {
@@ -104,7 +150,7 @@ class AutomaticDrillEditor extends StatelessWidget {
                           ),
                           textCapitalization: TextCapitalization.sentences,
                           onChanged: (String value) {
-                            editingDrill.description = value;
+                            editingDrill.description = value.trim();
                           },
                           validator: (text) {
                             if (text == '') {
@@ -126,40 +172,44 @@ class AutomaticDrillEditor extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-            RangeEditingCard(
+            AutomaticDrillRangeEditingCard(
               title: "Firing Speed",
               max: globals.firingSpeedMax,
               min: globals.firingSpeedMin,
-              onChanged: (RangeValues values) async {
-                editingDrill.firingSpeedMin = values.start.floor();
-                editingDrill.firingSpeedMax = values.end.floor();
+              onChanged: (int start, int end, int factor) async {
+                editingDrill.firingSpeedMin = start;
+                editingDrill.firingSpeedMax = end;
+                editingDrill.firingSpeedFactor = factor;
               },
             ),
-            RangeEditingCard(
+            AutomaticDrillRangeEditingCard(
               title: "Oscillation Speed",
               max: globals.oscillationSpeedMax,
               min: globals.oscillationSpeedMin,
-              onChanged: (RangeValues values) async {
-                editingDrill.oscillationSpeedMin = values.start.floor();
-                editingDrill.oscillationSpeedMax = values.end.floor();
+              onChanged: (int start, int end, int factor) async {
+                editingDrill.oscillationSpeedMin = start;
+                editingDrill.oscillationSpeedMax = end;
+                editingDrill.oscillationSpeedFactor = factor;
               },
             ),
-            RangeEditingCard(
+            AutomaticDrillRangeEditingCard(
               title: "Topspin",
               max: globals.topspinMax,
               min: globals.topspinMin,
-              onChanged: (RangeValues values) async {
-                editingDrill.topspinMin = values.start.floor();
-                editingDrill.topspinMax = values.end.floor();
+              onChanged: (int start, int end, int factor) async {
+                editingDrill.topspinMin = start;
+                editingDrill.topspinMax = end;
+                editingDrill.topspinFactor = factor;
               },
             ),
-            RangeEditingCard(
+            AutomaticDrillRangeEditingCard(
               title: "Backspin",
               max: globals.backspinMax,
               min: globals.topspinMin,
-              onChanged: (RangeValues values) async {
-                editingDrill.backspinMin = values.start.floor();
-                editingDrill.backspinMax = values.end.floor();
+              onChanged: (int start, int end, int factor) async {
+                editingDrill.backspinMin = start;
+                editingDrill.backspinMax = end;
+                editingDrill.backspinFactor = factor;
               },
             ),
             SizedBox(
@@ -174,12 +224,8 @@ class AutomaticDrillEditor extends StatelessWidget {
         backgroundColor: globals.accentColor,
         onPressed: () {
           if (formKey.currentState.validate()) {
-            PingPongRoot.of(context)
-                .addAutomaticDrill(AutomaticDrill.copy(editingDrill));
-            Navigator.of(context).pop();
-          }
-          else {
-
+            editingDrill.addToServer(context);
+            globals.rootNaviagatorKey.currentState.pop();
           }
         },
       ),
@@ -193,76 +239,32 @@ class SalesData {
   final double sales;
 }
 
-class RangeEditingCard extends StatefulWidget {
+class AutomaticDrillRangeEditingCard extends StatefulWidget {
   final String title;
   final int max;
   final int min;
-  final Function(RangeValues) onChanged;
+  final Function(int, int, int) onChanged;
 
-  RangeEditingCard({Key key, this.title, this.max, this.min, this.onChanged})
+  AutomaticDrillRangeEditingCard(
+      {Key key, this.title, this.max, this.min, this.onChanged})
       : super(key: key);
 
   @override
-  _RangeEditingCardState createState() => _RangeEditingCardState();
+  _AutomaticDrillRangeEditingCardState createState() =>
+      _AutomaticDrillRangeEditingCardState();
 }
 
-class _RangeEditingCardState extends State<RangeEditingCard> {
+class _AutomaticDrillRangeEditingCardState
+    extends State<AutomaticDrillRangeEditingCard> {
   int rangeStart = 0;
   int rangeEnd = 255;
 
   double noiseFactor = 8;
   RangeValues valueRange = RangeValues(0.0, 255.0);
 
-  _RangeEditingCardState({Key key});
+  _AutomaticDrillRangeEditingCardState({Key key});
 
-  List<double> generatedNoise = noise2(1, 256,
-          noiseType: NoiseType.SimplexFractal,
-          seed: math.Random().nextInt(256),
-          gain: 5000,
-          octaves: 3,
-          frequency: 0.075)[0]
-      .map((index) => (index + 1) * 128)
-      .toList();
-
-  LineChartData mainData() {
-    return LineChartData(
-      gridData: FlGridData(show: false),
-      titlesData: FlTitlesData(show: false),
-      borderData: FlBorderData(show: false),
-      minX: 0,
-      maxX: noiseFactor.floorToDouble() - 1,
-      minY: 0,
-      maxY: 255,
-      lineTouchData: LineTouchData(enabled: false),
-      lineBarsData: [
-        LineChartBarData(
-          spots: List<FlSpot>.generate(noiseFactor.floor(), (x) {
-            double localNoise = math.max(generatedNoise[x], valueRange.start);
-            localNoise = math.min(localNoise, valueRange.end);
-
-            return FlSpot(x.toDouble(), localNoise);
-          }),
-          isCurved: true,
-          colors: <Color>[Colors.lightBlue],
-          barWidth: 5,
-          isStrokeCapRound: true,
-          dotData: const FlDotData(
-            show: false,
-          ),
-          belowBarData: BarAreaData(
-            show: true,
-            colors: <Color>[
-              Colors.lightBlue.withOpacity(0.3),
-              Colors.lightBlue.withOpacity(0),
-            ],
-            gradientColorStops: [0.5, 1.0],
-            gradientFrom: const Offset(0, 0),
-            gradientTo: const Offset(0, 1),
-          ),
-        ),
-      ],
-    );
-  }
+  List<double> generatedNoise = AutomaticDrillValueGraph.generateNoise();
 
   @override
   Widget build(BuildContext context) {
@@ -273,14 +275,10 @@ class _RangeEditingCardState extends State<RangeEditingCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            SizedBox(
-              height: 128,
-              child: Row(children: <Widget>[
-                Expanded(
-                  flex: 1,
-                  child: LineChart(mainData()),
-                ),
-              ]),
+            AutomaticDrillValueGraph(
+              generatedNoise: generatedNoise,
+              noiseFactor: noiseFactor,
+              valueRange: valueRange,
             ),
             SizedBox(height: 12),
             Padding(
@@ -309,7 +307,8 @@ class _RangeEditingCardState extends State<RangeEditingCard> {
               max: widget.max.toDouble(),
               min: widget.min.toDouble(),
               onChanged: (RangeValues values) {
-                widget.onChanged(values);
+                widget.onChanged(values.start.floor(), values.end.floor(),
+                    noiseFactor.floor());
 
                 setState(() {
                   this.valueRange = values;
@@ -344,6 +343,9 @@ class _RangeEditingCardState extends State<RangeEditingCard> {
               min: 8,
               value: noiseFactor,
               onChanged: (double value) {
+                widget.onChanged(valueRange.start.floor(),
+                    valueRange.end.floor(), value.floor());
+
                 setState(() {
                   noiseFactor = value;
                 });
@@ -352,6 +354,91 @@ class _RangeEditingCardState extends State<RangeEditingCard> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class AutomaticDrillValueGraph extends StatelessWidget {
+  AutomaticDrillValueGraph({
+    this.generatedNoise,
+    this.noiseFactor,
+    this.valueRange,
+    Key key,
+  }) : super(key: key);
+
+  List<double> generatedNoise;
+  double noiseFactor;
+  RangeValues valueRange;
+
+  static List<double> generateNoise() {
+    return noise2(1, 256,
+        noiseType: NoiseType.SimplexFractal,
+        seed: math.Random().nextInt(256),
+        gain: 5000,
+        octaves: 3,
+        frequency: 0.075)[0];
+  }
+
+  LineChartData formatData() {
+    return LineChartData(
+      gridData: FlGridData(show: false),
+      titlesData: FlTitlesData(show: false),
+      borderData: FlBorderData(show: false),
+      minX: 0,
+      maxX: noiseFactor.floorToDouble() - 1,
+      minY: 0,
+      maxY: 255,
+      lineTouchData: LineTouchData(enabled: false),
+      lineBarsData: [
+        LineChartBarData(
+          spots: List<FlSpot>.generate(noiseFactor.floor(), (x) {
+            double lowest = generatedNoise.reduce(math.min);
+            double highest = generatedNoise.reduce(math.max);
+
+            double localNoise =
+                (((generatedNoise[x] - lowest) / (highest - lowest)) *
+                        (valueRange.end - valueRange.start)) +
+                    valueRange.start;
+
+            return FlSpot(x.toDouble(), localNoise);
+          }),
+          isCurved: true,
+          colors: <Color>[Colors.lightBlue],
+          barWidth: 5,
+          isStrokeCapRound: true,
+          dotData: FlDotData(show: false),
+          belowBarData: BarAreaData(
+            show: true,
+            colors: <Color>[
+              Colors.lightBlue.withOpacity(0.3),
+              Colors.lightBlue.withOpacity(0),
+            ],
+            gradientColorStops: [0.5, 1.0],
+            gradientFrom: const Offset(0, 0),
+            gradientTo: const Offset(0, 1),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget> [
+        SizedBox(
+          height: 5,
+        ),
+        SizedBox(
+          height: 160,
+          child: Row(children: <Widget>[
+            Expanded(
+              flex: 1,
+              child: LineChart(formatData()),
+            ),
+          ]),
+        ),
+      ],
     );
   }
 }

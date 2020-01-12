@@ -59,14 +59,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         helperText: 'The IP address of your Rasperry Pi',
                       ),
                       onChanged: (value) async {
-                        if (ipValidatorRegex.hasMatch(value.trim())) {
+                        if (ipValidatorRegex.hasMatch(value.trim()) || value.trim() == '') {
                           appState.setServerUrl(value.trim());
                           SharedPreferences prefs = await SharedPreferences.getInstance();
-                          prefs.setString('serverUrl', value);
+                          prefs.setString('serverUrl', value.trim());
                         }
                       },
                       validator: (value) {
-                        if (!ipValidatorRegex.hasMatch(value.trim())) {
+                        if (!ipValidatorRegex.hasMatch(value.trim()) || value.trim() == '') {
                           return 'Invalid IP address';
                         }
                         return null;

@@ -16,3 +16,5 @@ const int topspinMin = 0;
 
 final Color accentColor = Colors.indigoAccent[700];
 final Color errorAccentColor = Colors.redAccent[700];
+
+final rootNaviagatorKey = GlobalKey<NavigatorState>();
